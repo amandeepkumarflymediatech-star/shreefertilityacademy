@@ -1,0 +1,334 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TUTOR
+  STUDENT
+}
+
+enum OnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  UNDER_REVIEW
+  CHANGES_REQUESTED
+  APPROVED
+}
+
+model User {
+  id               String            @id @default(uuid())
+  email            String            @unique
+  name             String?
+  emailVerified    DateTime?
+  image            String?
+  password         String?
+  role             Role              @default(STUDENT)
+  isActive         Boolean           @default(true) // For Admin activation/deactivation
+
+  // Tutor Specific Profile Fields
+  onboardingStatus OnboardingStatus  @default(NOT_STARTED)
+  phone            String?
+  timezone         String?
+  bio              String?           @db.Text
+  experience       String?           @db.Text
+  qualifications   String?           @db.Text
+  languages        String?
+  teachingHeadline String?
+  teachingLevels   String?
+  teachingAges     String?
+  teachingStyle    String?
+  isApproved       Boolean           @default(false)
+
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  accounts         Account[]
+  sessions         NextAuthSession[]
+
+  // Relations for new Cohort Model
+  memberships      Membership[]
+  taughtClasses    LiveClass[]       @relation("TutorLiveClasses")
+  enrollments      ClassEnrollment[]
+
+  // Finance
+  orders           Order[]
+  payments         Payment[]
+
+  // Notifications & Activities
+  notifications    Notification[]
+  activities       ActivityLog[]
+  blogPosts        BlogPost[]
+
+  // Reviews
+  studentReviews   Review[]          @relation("StudentReviews")
+  tutorReviews     Review[]          @relation("TutorReviews")
+}
+
+// NextAuth Required Models
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model NextAuthSession {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("Session_NextAuth") // Rename to avoid conflict with Platform Session
+}
+
+// ==========================================
+// CORE COHORT / MEMBERSHIP DATA
+// ==========================================
+
+model Membership {
+  id           String   @id @default(uuid())
+  studentId    String
+  startDate    DateTime @default(now())
+  validUntil   DateTime
+  status       String   @default("ACTIVE") // ACTIVE, EXPIRED, CANCELLED
+  maxClasses   Int      @default(12)
+  usedClasses  Int      @default(0)
+
+  student      User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  orders       Order[]  // The order(s) used to purchase this membership
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model LiveClass {
+  id          String   @id @default(uuid())
+  tutorId     String
+  title       String
+  description String?  @db.Text
+  scheduledAt DateTime
+  meetingUrl  String?
+  status      String   @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+
+  tutor       User     @relation("TutorLiveClasses", fields: [tutorId], references: [id])
+  enrollments ClassEnrollment[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ClassEnrollment {
+  id          String   @id @default(uuid())
+  sessionId   String
+  studentId   String
+  status      String   @default("REGISTERED") // REGISTERED, ATTENDED, MISSED
+
+  session     LiveClass @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student     User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([sessionId, studentId])
+}
+
+// ==========================================
+// PAYMENT & ORDERS (PhonePe Integration)
+// ==========================================
+
+model Order {
+  id           String      @id @default(uuid())
+  studentId    String
+  membershipId String?
+  couponId     String?     // Optional applied discount coupon
+  amount       Float
+  currency     String      @default("INR")
+  status       String      @default("PENDING") // PENDING, PROCESSING, PAID, FAILED, REFUNDED
+
+  student      User        @relation(fields: [studentId], references: [id])
+  membership   Membership? @relation(fields: [membershipId], references: [id])
+  coupon       Coupon?     @relation(fields: [couponId], references: [id])
+
+  payment      Payment?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Payment {
+  id                     String   @id @default(uuid())
+  orderId                String   @unique
+  studentId              String
+  amount                 Float
+  currency               String   @default("INR")
+  merchantTransactionId  String   @unique // PhonePe's required unique ID per transaction
+  phonepeTransactionId   String?  @unique // ID returned by PhonePe upon success
+  status                 String   @default("PENDING") // PENDING, PAID, FAILED, REFUNDED
+
+  order                  Order    @relation(fields: [orderId], references: [id])
+  student                User     @relation(fields: [studentId], references: [id])
+  transactions           PaymentTransaction[]
+
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model PaymentTransaction {
+  id          String   @id @default(uuid())
+  paymentId   String
+  status      String
+  rawData     String   @db.Text // Store full webhook payload from PhonePe
+  createdAt   DateTime @default(now())
+
+  payment     Payment  @relation(fields: [paymentId], references: [id])
+}
+
+model WebhookEvent {
+  id          String   @id @default(uuid())
+  source      String   @default("PHONEPE")
+  eventId     String   @unique // To prevent duplicate processing
+  eventType   String
+  payload     String   @db.LongText
+  status      String   @default("PENDING") // PENDING, PROCESSED, FAILED
+  error       String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ==========================================
+// SYSTEM FEATURES
+// ==========================================
+
+model Notification {
+  id          String   @id @default(uuid())
+  userId      String
+  type        String
+  title       String
+  message     String   @db.Text
+  isRead      Boolean  @default(false)
+  relatedId   String?  // ID of booking/payment etc
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  actorId     String?  // Null if system
+  action      String
+  entityType  String
+  entityId    String
+  oldValue    String?  @db.Text
+  newValue    String?  @db.Text
+
+  actor       User?    @relation(fields: [actorId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model PlatformSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String   @db.Text
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+model ContactMessage {
+  id              String   @id @default(uuid())
+  name            String
+  email           String
+  studyPreference String
+  message         String   @db.Text
+  createdAt       DateTime @default(now())
+  status          String   @default("UNREAD") // UNREAD, READ, RESOLVED
+}
+
+model BlogPost {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  content     String   @db.LongText
+  excerpt     String?  @db.Text
+  coverImage  String?
+  published   Boolean  @default(false)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  tags        String?  // Comma separated tags
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SeoMetadata {
+  id            String   @id @default(uuid())
+  pagePath      String   @unique // e.g., "/", "/about", "/contact"
+  title         String
+  description   String?  @db.Text
+  keywords      String?
+  ogImage       String?
+  canonicalUrl  String?
+  ogTitle       String?
+  ogDescription String?  @db.Text
+  headerScripts String?  @db.Text
+  footerScripts String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([email, token])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  studentId String
+  tutorId   String?  // Optional, if the review is for a specific tutor
+  rating    Int      @default(5)
+  content   String   @db.Text
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student   User     @relation("StudentReviews", fields: [studentId], references: [id], onDelete: Cascade)
+  tutor     User?    @relation("TutorReviews", fields: [tutorId], references: [id], onDelete: SetNull)
+}
+
+model Coupon {
+  id              String   @id @default(uuid())
+  code            String   @unique
+  description     String?  @db.Text
+  discountType    String   // PERCENTAGE, FIXED_AMOUNT
+  discountValue   Float
+  maxUses         Int?     // null means unlimited
+  usedCount       Int      @default(0)
+  validUntil      DateTime?
+  isActive        Boolean  @default(true)
+
+  orders          Order[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
