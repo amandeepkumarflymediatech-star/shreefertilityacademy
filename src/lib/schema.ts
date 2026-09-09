@@ -3,6 +3,7 @@ config(); // Load .env before initializing models
 
 import { sequelize } from "./sequelize";
 import * as models from "../models"; // Ensure models are imported so they register with sequelize
+console.log(`Registered ${Object.keys(models).length} models.`);
 
 async function syncDatabase() {
   try {
