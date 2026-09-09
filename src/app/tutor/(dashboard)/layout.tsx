@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/db';
+import { User } from '@/models';
 import { redirect } from 'next/navigation';
 import DashboardLayout from './_components/DashboardLayout';
 
@@ -11,8 +11,9 @@ export default async function TutorLayout({ children }: { children: React.ReactN
     redirect('/login');
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: session.user.id }
+  const dbUser = await User.findOne({
+    where: { id: session.user.id },
+    raw: true
   });
 
   // Block access to the dashboard if the tutor is not approved

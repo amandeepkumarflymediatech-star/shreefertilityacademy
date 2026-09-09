@@ -137,6 +137,69 @@ export default function ProfileForm({ user }: { user: any }) {
         </div>
       </div>
 
+      {/* Address Details Section */}
+      <div className="pt-6 border-t border-secondary/20">
+        <h4 className="text-lg font-bold text-primary mb-6">Address Details</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+          <div className="space-y-2 group sm:col-span-2">
+            <label className="block text-[11px] font-black text-primary/70 uppercase tracking-widest ml-1 group-focus-within:text-accent transition-colors">Address Line 1</label>
+            <input 
+              type="text" 
+              name="addressLine1"
+              defaultValue={user?.addressLine1 || ""}
+              placeholder="Street Address, P.O. box, company name, c/o"
+              className="w-full bg-secondary/5 border-2 border-transparent focus:border-accent/20 focus:bg-white px-4 py-3.5 text-sm font-medium text-primary outline-none transition-all rounded-2xl shadow-sm hover:bg-secondary/10"
+            />
+          </div>
+          <div className="space-y-2 group sm:col-span-2">
+            <label className="block text-[11px] font-black text-primary/70 uppercase tracking-widest ml-1 group-focus-within:text-accent transition-colors">Address Line 2 (Optional)</label>
+            <input 
+              type="text" 
+              name="addressLine2"
+              defaultValue={user?.addressLine2 || ""}
+              placeholder="Apartment, suite, unit, building, floor, etc."
+              className="w-full bg-secondary/5 border-2 border-transparent focus:border-accent/20 focus:bg-white px-4 py-3.5 text-sm font-medium text-primary outline-none transition-all rounded-2xl shadow-sm hover:bg-secondary/10"
+            />
+          </div>
+          <div className="space-y-2 group">
+            <label className="block text-[11px] font-black text-primary/70 uppercase tracking-widest ml-1 group-focus-within:text-accent transition-colors">City</label>
+            <input 
+              type="text" 
+              name="city"
+              defaultValue={user?.city || ""}
+              className="w-full bg-secondary/5 border-2 border-transparent focus:border-accent/20 focus:bg-white px-4 py-3.5 text-sm font-medium text-primary outline-none transition-all rounded-2xl shadow-sm hover:bg-secondary/10"
+            />
+          </div>
+          <div className="space-y-2 group">
+            <label className="block text-[11px] font-black text-primary/70 uppercase tracking-widest ml-1 group-focus-within:text-accent transition-colors">State / Province</label>
+            <input 
+              type="text" 
+              name="state"
+              defaultValue={user?.state || ""}
+              className="w-full bg-secondary/5 border-2 border-transparent focus:border-accent/20 focus:bg-white px-4 py-3.5 text-sm font-medium text-primary outline-none transition-all rounded-2xl shadow-sm hover:bg-secondary/10"
+            />
+          </div>
+          <div className="space-y-2 group">
+            <label className="block text-[11px] font-black text-primary/70 uppercase tracking-widest ml-1 group-focus-within:text-accent transition-colors">Country</label>
+            <input 
+              type="text" 
+              name="country"
+              defaultValue={user?.country || ""}
+              className="w-full bg-secondary/5 border-2 border-transparent focus:border-accent/20 focus:bg-white px-4 py-3.5 text-sm font-medium text-primary outline-none transition-all rounded-2xl shadow-sm hover:bg-secondary/10"
+            />
+          </div>
+          <div className="space-y-2 group">
+            <label className="block text-[11px] font-black text-primary/70 uppercase tracking-widest ml-1 group-focus-within:text-accent transition-colors">ZIP / Postal Code</label>
+            <input 
+              type="text" 
+              name="zipCode"
+              defaultValue={user?.zipCode || ""}
+              className="w-full bg-secondary/5 border-2 border-transparent focus:border-accent/20 focus:bg-white px-4 py-3.5 text-sm font-medium text-primary outline-none transition-all rounded-2xl shadow-sm hover:bg-secondary/10"
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="pt-6 border-t border-secondary/30 flex justify-end">
         <button 
           type="submit" 

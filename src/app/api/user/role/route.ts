@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/db';
+import { User } from '@/models';
 
 export async function POST(req: Request) {
   try {
@@ -19,14 +19,24 @@ export async function POST(req: Request) {
     }
 
     // Update user to Tutor if they aren't already
-    const user = await prisma.user.update({
-      where: { email: session.user.email },
-      data: { 
+    const [updatedCount] = await User.update(
+      { 
         role: 'TUTOR',
         // If they switch to tutor via Google Auth, they must still await admin approval
         isApproved: false 
-      }
-    });
+      },
+      { where: { email: session.user.email } }
+    );
+    
+    if (updatedCount === 0) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+    
+    const user = await User.findOne({ where: { email: session.user.email }});
+    
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
 
     return NextResponse.json({ success: true, user: { role: user.role, isApproved: user.isApproved } });
   } catch (error) {

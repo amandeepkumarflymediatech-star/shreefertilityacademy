@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { User } from "@/models";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -11,8 +11,9 @@ export default async function TutorProfilePage() {
     redirect("/login");
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await User.findOne({
     where: { id: session.user.id },
+    raw: true
   });
 
   return (

@@ -6,7 +6,7 @@ export const PHONEPE_SALT_INDEX = process.env.PHONEPE_SALT_INDEX || '1';
 export const PHONEPE_ENV = process.env.PHONEPE_ENV || 'UAT'; // 'UAT' or 'PROD'
 
 export const PHONEPE_BASE_URL = 
-  PHONEPE_ENV === 'PROD' 
+  (PHONEPE_ENV === 'PROD' || PHONEPE_ENV === 'production')
     ? 'https://api.phonepe.com/apis/hermes' 
     : 'https://api-preprod.phonepe.com/apis/pg-sandbox';
 

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Clock, CheckCircle2 } from 'lucide-react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/db';
+import { User } from '@/models';
 import { redirect } from 'next/navigation';
 import OnboardingForm from './_components/OnboardingForm';
 
@@ -15,8 +15,9 @@ export default async function TutorOnboardingPage() {
   }
 
   // Fetch the latest user data to see if they completed onboarding
-  const dbUser = (await prisma.user.findUnique({
-    where: { id: session.user.id }
+  const dbUser = (await User.findOne({
+    where: { id: session.user.id },
+    raw: true
   })) as any;
 
   if (!dbUser) {

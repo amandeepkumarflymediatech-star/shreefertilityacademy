@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from "@/lib/db";
+import { LiveClass } from "@/models";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -13,7 +13,7 @@ export async function updateMeetingLink(classId: string, url: string) {
   }
 
   // Verify the class belongs to this tutor
-  const liveClass = await prisma.liveClass.findUnique({
+  const liveClass = await LiveClass.findOne({
     where: { id: classId }
   });
 
@@ -21,10 +21,10 @@ export async function updateMeetingLink(classId: string, url: string) {
     throw new Error('Unauthorized or class not found');
   }
 
-  await prisma.liveClass.update({
-    where: { id: classId },
-    data: { meetingUrl: url }
-  });
+  await LiveClass.update(
+    { meetingUrl: url },
+    { where: { id: classId } }
+  );
 
   revalidatePath('/tutor');
   return { success: true };

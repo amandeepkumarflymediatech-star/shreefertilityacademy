@@ -27,6 +27,12 @@ export async function updateProfile(formData: FormData) {
   const teachingLevels = formData.get("teachingLevels") as string | null;
   const teachingAges = formData.get("teachingAges") as string | null;
   const teachingStyle = formData.get("teachingStyle") as string | null;
+  const addressLine1 = formData.get("addressLine1") as string | null;
+  const addressLine2 = formData.get("addressLine2") as string | null;
+  const city = formData.get("city") as string | null;
+  const state = formData.get("state") as string | null;
+  const country = formData.get("country") as string | null;
+  const zipCode = formData.get("zipCode") as string | null;
   const imageFile = formData.get("image") as File | null;
 
   if (!name || !email) {
@@ -58,6 +64,12 @@ export async function updateProfile(formData: FormData) {
       ...(bio !== null && { bio }),
       ...(phone !== null && { phone }),
       ...(timezone !== null && { timezone }),
+      ...(addressLine1 !== null && { addressLine1 }),
+      ...(addressLine2 !== null && { addressLine2 }),
+      ...(city !== null && { city }),
+      ...(state !== null && { state }),
+      ...(country !== null && { country }),
+      ...(zipCode !== null && { zipCode }),
       ...(experience !== null && { experience }),
       ...(qualifications !== null && { qualifications }),
       ...(languages !== null && { languages }),

@@ -1,5 +1,6 @@
 import React from 'react';
-import { prisma } from '@/lib/db';
+import { User } from '@/models';
+import { Op } from 'sequelize';
 import Image from 'next/image';
 import { GraduationCap, CheckCircle2, Search } from 'lucide-react';
 import Link from 'next/link';
@@ -12,18 +13,19 @@ export default async function AllTutorsPage({ searchParams }: { searchParams: Pr
   const resolvedParams = await searchParams;
   const query = resolvedParams.q || '';
 
-  const tutors = await prisma.user.findMany({
+  const tutors = await User.findAll({
     where: {
       role: 'TUTOR',
       isApproved: true,
       ...(query ? {
-        OR: [
-          { name: { contains: query } },
-          { teachingHeadline: { contains: query } },
-          { bio: { contains: query } }
+        [Op.or]: [
+          { name: { [Op.substring]: query } },
+          { teachingHeadline: { [Op.substring]: query } },
+          { bio: { [Op.substring]: query } }
         ]
       } : {})
-    }
+    },
+    raw: true
   });
 
   return (

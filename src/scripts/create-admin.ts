@@ -22,7 +22,7 @@ async function createAdmin() {
         password: hashedPassword,
         role: "ADMIN",
         isApproved: true,
-      },
+      } as any,
     });
 
     if (created) {

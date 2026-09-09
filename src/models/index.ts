@@ -36,6 +36,12 @@ export interface UserAttributes {
   teachingAges?: string;
   teachingStyle?: string;
   isApproved?: boolean;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zipCode?: string;
   createdAt?: Date;
   updatedAt: Date;
 }
@@ -63,6 +69,12 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   declare teachingAges: any;
   declare teachingStyle: any;
   declare isApproved: any;
+  declare addressLine1: any;
+  declare addressLine2: any;
+  declare city: any;
+  declare state: any;
+  declare country: any;
+  declare zipCode: any;
   declare createdAt: any;
   declare updatedAt: any;
 }

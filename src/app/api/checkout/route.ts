@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { Order } from "@/models";
 import { 
   PHONEPE_MERCHANT_ID, 
   PHONEPE_BASE_URL, 
@@ -23,15 +23,13 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Create a Pending Order in DB
-    const order = await prisma.order.create({
-      data: {
-        studentId: session.user.id,
-        amount: amount,
-        currency: "INR",
-        status: "PENDING",
-        // We will store membership details after payment success
-      }
-    });
+    const order = await Order.create({
+      studentId: session.user.id,
+      amount: amount,
+      currency: "INR",
+      status: "PENDING",
+      // We will store membership details after payment success
+    } as any);
 
     const merchantTransactionId = `MT${order.id.replace(/-/g, '').substring(0, 30)}`;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -59,6 +57,11 @@ export async function POST(req: NextRequest) {
     const checksum = generateChecksum(payloadBase64, endpoint);
 
     // 4. Call PhonePe API
+    console.log("PHONEPE_BASE_URL:", PHONEPE_BASE_URL);
+    console.log("ENDPOINT:", endpoint);
+    console.log("FULL URL:", `${PHONEPE_BASE_URL}${endpoint}`);
+    console.log("PHONEPE_MERCHANT_ID:", PHONEPE_MERCHANT_ID);
+
     const response = await fetch(`${PHONEPE_BASE_URL}${endpoint}`, {
       method: "POST",
       headers: {
