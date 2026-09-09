@@ -1,6 +1,7 @@
 import { Calendar, Video, Award, Clock, ArrowRight, Target, CheckCircle2, History, CreditCard, Play, FileText } from "lucide-react";
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { ClassEnrollment, Membership, Order, LiveClass, User } from "@/models";
+import { Op } from "sequelize";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -13,54 +14,54 @@ export default async function StudentDashboard() {
   }
 
   // Fetch upcoming classes
-  const upcomingEnrollments = await prisma.classEnrollment.findMany({
+  const upcomingEnrollments = await ClassEnrollment.findAll({
     where: { 
       studentId: session.user.id, 
       status: 'REGISTERED',
-      session: {
-        scheduledAt: { gte: new Date() }
-      }
     },
-    include: { 
-      session: {
-        include: { tutor: true }
-      } 
-    },
-    orderBy: { session: { scheduledAt: 'asc' } },
-    take: 3
+    include: [{ 
+      model: LiveClass,
+      as: 'session',
+      where: {
+        scheduledAt: { [Op.gte]: new Date() }
+      },
+      include: [{ model: User, as: 'tutor' }]
+    }],
+    order: [[{ model: LiveClass, as: 'session' }, 'scheduledAt', 'ASC']],
+    limit: 3
   });
 
   // Fetch past attended classes
-  const pastEnrollments = await prisma.classEnrollment.findMany({
+  const pastEnrollments = await ClassEnrollment.findAll({
     where: { 
       studentId: session.user.id, 
       status: 'ATTENDED' 
     },
-    include: { 
-      session: {
-        include: { tutor: true }
-      } 
-    },
-    orderBy: { session: { scheduledAt: 'desc' } },
-    take: 4
+    include: [{ 
+      model: LiveClass,
+      as: 'session',
+      include: [{ model: User, as: 'tutor' }]
+    }],
+    order: [[{ model: LiveClass, as: 'session' }, 'scheduledAt', 'DESC']],
+    limit: 4
   });
 
   // Fetch active memberships
-  const activeMemberships = await prisma.membership.findMany({
+  const activeMemberships = await Membership.findAll({
     where: { studentId: session.user.id, status: 'ACTIVE' },
   });
 
   // Fetch paid orders for invoices
-  const paidOrders = await prisma.order.findMany({
+  const paidOrders = await Order.findAll({
     where: { studentId: session.user.id, status: 'PAID' },
-    orderBy: { createdAt: 'desc' }
+    order: [['createdAt', 'DESC']]
   });
 
-  const completedCount = await prisma.classEnrollment.count({
+  const completedCount = await ClassEnrollment.count({
     where: { studentId: session.user.id, status: 'ATTENDED' }
   });
 
-  const upcomingClasses = upcomingEnrollments.map(e => ({
+  const upcomingClasses = upcomingEnrollments.map((e: any) => ({
     id: e.session.id,
     tutor: e.session.tutor.name || 'Mentor',
     title: e.session.title,
@@ -69,7 +70,7 @@ export default async function StudentDashboard() {
     url: e.session.meetingUrl || '/student/live'
   }));
 
-  const pastClasses = pastEnrollments.map(e => ({
+  const pastClasses = pastEnrollments.map((e: any) => ({
     id: e.session.id,
     tutor: e.session.tutor.name || 'Mentor',
     title: e.session.title,

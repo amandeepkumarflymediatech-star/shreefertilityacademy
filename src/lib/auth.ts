@@ -8,7 +8,14 @@ import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
   // @ts-ignore - The adapter's User model typing expects specific properties
-  adapter: SequelizeAdapter(sequelize, { models: { User: sequelize.models.User } }) as any,
+  adapter: SequelizeAdapter(sequelize, {
+    synchronize: false,
+    models: {
+      User: sequelize.models.User,
+      Account: sequelize.models.Account,
+      Session: sequelize.models.NextAuthSession,
+    } as any
+  }) as any,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",

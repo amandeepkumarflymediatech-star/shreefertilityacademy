@@ -728,6 +728,7 @@ Account.init({
 }, {
   sequelize,
   modelName: 'Account',
+  timestamps: false,
 });
 
 NextAuthSession.init({
@@ -752,6 +753,7 @@ NextAuthSession.init({
 }, {
   sequelize,
   modelName: 'NextAuthSession',
+  timestamps: false,
 });
 
 Membership.init({
