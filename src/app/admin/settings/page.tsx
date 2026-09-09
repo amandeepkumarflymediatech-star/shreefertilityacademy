@@ -12,10 +12,10 @@ export default async function AdminSettingsPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-b border-secondary pb-6">
+      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-secondary/20 mb-6">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black text-primary tracking-tight font-playfair">Platform Settings</h1>
-          <p className="text-primary/70 mt-2 font-sans text-base sm:text-lg">Manage global configuration and preferences.</p>
+          <h1 className="text-2xl font-black text-primary font-playfair tracking-tight">Platform Settings</h1>
+          <p className="text-primary/60 text-sm mt-1">Manage global configuration and preferences.</p>
         </div>
       </div>
 
@@ -42,7 +42,7 @@ export default async function AdminSettingsPage() {
 
         {/* Content */}
         <div className="md:col-span-3 space-y-6">
-          <div className="bg-white border border-secondary/30 p-8 rounded-3xl shadow-sm">
+          <div className="bg-white border border-secondary/20 p-8 rounded-2xl shadow-sm">
             <h2 className="text-2xl font-black text-primary font-playfair tracking-tight mb-8">General Settings</h2>
 
             <form className="space-y-6">
@@ -51,7 +51,7 @@ export default async function AdminSettingsPage() {
                   <label className="block text-xs font-bold text-primary uppercase tracking-widest mb-2 ml-1">Platform Name</label>
                   <input
                     type="text"
-                    defaultValue="HD Clarity Speech"
+                    defaultValue="Shree Fertility Academy"
                     className="w-full bg-secondary/5 border border-secondary/50 rounded-xl px-4 py-3 text-sm focus:border-accent focus:ring-1 focus:ring-accent text-primary outline-none transition-all hover:bg-white"
                   />
                 </div>
@@ -59,7 +59,7 @@ export default async function AdminSettingsPage() {
                   <label className="block text-xs font-bold text-primary uppercase tracking-widest mb-2 ml-1">Support Email</label>
                   <input
                     type="email"
-                    defaultValue="hridey@hdclarityspeech.com"
+                    defaultValue="hridey@shreefertilityacademy.com"
                     className="w-full bg-secondary/5 border border-secondary/50 rounded-xl px-4 py-3 text-sm focus:border-accent focus:ring-1 focus:ring-accent text-primary outline-none transition-all hover:bg-white"
                   />
                 </div>
@@ -83,7 +83,7 @@ export default async function AdminSettingsPage() {
             </form>
           </div>
 
-          <div className="bg-white border border-secondary/30 p-8 rounded-3xl shadow-sm">
+          <div className="bg-white border border-secondary/20 p-8 rounded-2xl shadow-sm">
             <h2 className="text-2xl font-black text-red-600 font-playfair tracking-tight mb-6">Danger Zone</h2>
             <div className="flex flex-col sm:flex-row justify-between items-center gap-6 p-6 bg-red-50 border border-red-200 rounded-2xl">
               <div>

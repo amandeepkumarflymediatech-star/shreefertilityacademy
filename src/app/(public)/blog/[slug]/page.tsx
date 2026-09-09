@@ -12,10 +12,10 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await prisma.blogPost.findUnique({ where: { slug } });
-  if (!post) return { title: 'Not Found | HD Clarity Speech' };
+  if (!post) return { title: 'Not Found | Shree Fertility Academy' };
   
   return {
-    title: `${post.title} | HD Clarity Speech`,
+    title: `${post.title} | Shree Fertility Academy`,
     description: post.excerpt || post.content.replace(/<[^>]*>?/gm, '').substring(0, 160),
   };
 }
@@ -128,9 +128,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </div>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-1">Written by</p>
-            <h3 className="text-2xl font-black text-slate-900 font-playfair mb-3">{post.author.name || 'HD Clarity Admin'}</h3>
+            <h3 className="text-2xl font-black text-slate-900 font-playfair mb-3">{post.author.name || 'Shree Fertility Academy Admin'}</h3>
             <p className="text-slate-600 leading-relaxed text-sm">
-              {post.author.bio || "Dedicated to helping individuals find their voice and speak with clarity. Part of the HD Clarity Speech team."}
+              {post.author.bio || "Dedicated to helping individuals find their voice and speak with clarity. Part of the Shree Fertility Academy team."}
             </p>
           </div>
         </div>

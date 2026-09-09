@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import logoImg from "@/../public/logo.png";
-import { ArrowRight, User, Mail, Lock, CheckCircle2, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { ArrowRight, User, Mail, Lock, CheckCircle2, Eye, EyeOff, ArrowLeft, Microscope } from 'lucide-react';
 import gsap from 'gsap';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -20,7 +18,7 @@ export default function Signup() {
   
   const router = useRouter();
   const formRef = useRef(null);
-  const imageRef = useRef(null);
+  const infoRef = useRef(null);
 
   useEffect(() => {
     gsap.fromTo(
@@ -29,7 +27,7 @@ export default function Signup() {
       { opacity: 1, x: 0, duration: 1, ease: 'power3.out' }
     );
     gsap.fromTo(
-      imageRef.current,
+      infoRef.current,
       { opacity: 0, x: 50 },
       { opacity: 1, x: 0, duration: 1, ease: 'power3.out', delay: 0.2 }
     );
@@ -55,7 +53,6 @@ export default function Signup() {
         return;
       }
 
-      // Automatically log in after successful signup
       const signInRes = await signIn('credentials', {
         email,
         password,
@@ -85,73 +82,71 @@ export default function Signup() {
     }
   };
 
-
-
   return (
-    <div className="min-h-screen bg-secondary flex items-center justify-center p-4 sm:p-8 font-sans">
-      <div className="max-w-6xl w-full bg-white rounded-none shadow-xl overflow-hidden flex flex-col md:flex-row border border-secondary">
+    <div className="min-h-screen bg-primary-bg flex items-center justify-center p-4 sm:p-8 font-sans selection:bg-accent selection:text-white">
+      <div className="max-w-6xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row border border-secondary/10">
         
         {/* Left Form Section */}
         <div ref={formRef} className="w-full md:w-1/2 p-8 sm:p-12 md:p-16 flex flex-col justify-center bg-white relative">
-          <Link href="/signup" className="inline-flex items-center gap-2 text-primary/60 hover:text-accent font-bold text-xs tracking-widest uppercase mb-8 transition-colors self-start">
-            <ArrowLeft size={16} /> Back to Home
+          <Link href="/signup" className="inline-flex items-center gap-2 text-primary/60 hover:text-accent font-bold text-xs tracking-widest uppercase mb-10 transition-colors self-start bg-secondary/5 px-4 py-2 rounded-full">
+            <ArrowLeft size={16} /> Back
           </Link>
 
           <div className="mb-10 text-center md:text-left">
-            <h1 className="text-3xl sm:text-5xl font-black text-primary mb-3 font-playfair tracking-tight">
-              Create an account
+            <h1 className="text-3xl sm:text-4xl font-black text-primary font-playfair mb-3 tracking-tight">
+              Apply for Mentorship
             </h1>
             <p className="text-primary/70 font-sans text-lg">
-              Join thousands of others improving their speech clarity today.
+              Join our comprehensive clinical training in reproductive medicine.
             </p>
           </div>
 
           <form onSubmit={handleSignup} className="space-y-6">
             <div>
-              <label className="block text-xs font-bold text-primary uppercase tracking-widest mb-3">Full Name</label>
+              <label className="block text-xs font-bold text-primary uppercase tracking-widest mb-2">Full Name</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-0 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-primary/50" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-primary/40" />
                 </div>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="block w-full pl-8 pr-4 py-3 border-0 border-b-2 border-secondary text-primary bg-transparent focus:ring-0 focus:border-accent transition-colors duration-200 outline-none text-lg placeholder-primary/30"
-                  placeholder="John Doe"
+                  className="block w-full pl-11 pr-4 py-3 border border-secondary/20 rounded-xl text-primary bg-secondary/5 focus:ring-0 focus:border-accent focus:bg-white transition-colors duration-200 outline-none placeholder-primary/30"
+                  placeholder="Dr. John Doe"
                   required
                 />
               </div>
             </div>
             
             <div>
-              <label className="block text-xs font-bold text-primary uppercase tracking-widest mb-3">Email address</label>
+              <label className="block text-xs font-bold text-primary uppercase tracking-widest mb-2">Email address</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-0 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-primary/50" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-primary/40" />
                 </div>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-8 pr-4 py-3 border-0 border-b-2 border-secondary text-primary bg-transparent focus:ring-0 focus:border-accent transition-colors duration-200 outline-none text-lg placeholder-primary/30"
-                  placeholder="you@example.com"
+                  className="block w-full pl-11 pr-4 py-3 border border-secondary/20 rounded-xl text-primary bg-secondary/5 focus:ring-0 focus:border-accent focus:bg-white transition-colors duration-200 outline-none placeholder-primary/30"
+                  placeholder="doctor@clinic.com"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-primary uppercase tracking-widest mb-3">Password</label>
+              <label className="block text-xs font-bold text-primary uppercase tracking-widest mb-2">Password</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-0 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-primary/50" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-primary/40" />
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-8 pr-10 py-3 border-0 border-b-2 border-secondary text-primary bg-transparent focus:ring-0 focus:border-accent transition-colors duration-200 outline-none text-lg placeholder-primary/30"
+                  className="block w-full pl-11 pr-10 py-3 border border-secondary/20 rounded-xl text-primary bg-secondary/5 focus:ring-0 focus:border-accent focus:bg-white transition-colors duration-200 outline-none placeholder-primary/30"
                   placeholder="••••••••"
                   required
                   minLength={6}
@@ -159,7 +154,7 @@ export default function Signup() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-2 flex items-center text-primary/50 hover:text-primary transition-colors focus:outline-none"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-primary/40 hover:text-primary/70 transition-colors focus:outline-none"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -167,28 +162,33 @@ export default function Signup() {
             </div>
 
             {status === 'error' && (
-              <div className="p-4 bg-red-50 border border-accent text-accent text-sm rounded-none">
-                {errorMessage}
+              <div className="p-4 bg-accent/10 border border-accent/20 text-accent text-sm rounded-xl flex items-center gap-2">
+                <span className="font-bold">Error:</span> {errorMessage}
               </div>
             )}
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 mt-8">
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="w-full cursor-pointer flex items-center justify-center gap-2 bg-accent hover:bg-primary text-white font-bold py-5 px-8 transition-colors duration-200 shadow-sm group disabled:opacity-70 uppercase tracking-widest text-sm rounded-none"
+                className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-secondary text-white font-bold uppercase tracking-widest text-sm py-4 px-8 rounded-xl transition-all duration-200 shadow-md group disabled:opacity-70"
               >
-                <span>{status === 'loading' ? 'Creating account...' : 'Get Started'}</span>
+                <span>{status === 'loading' ? 'Creating account...' : 'Submit Application'}</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               
+              <div className="relative my-2">
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-secondary/20"></div></div>
+                <div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-primary/50 text-xs uppercase tracking-widest font-bold">Or</span></div>
+              </div>
+
               <button
                 type="button"
                 onClick={() => {
                   localStorage.setItem('intended_role', role);
                   signIn('google', { callbackUrl: '/auth-callback' });
                 }}
-                className="w-full cursor-pointer bg-white border-2 border-secondary text-primary py-3.5 font-bold uppercase tracking-widest text-xs hover:border-primary transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-white border border-secondary/20 rounded-xl text-primary py-3.5 font-bold text-sm tracking-widest uppercase hover:border-primary hover:bg-secondary/5 transition-colors flex items-center justify-center gap-3"
               >
                 <svg viewBox="0 0 24 24" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -201,7 +201,7 @@ export default function Signup() {
             </div>
           </form>
 
-          <div className="mt-8 text-center text-primary/70 font-sans text-sm">
+          <div className="mt-8 text-center text-primary/70 text-sm">
             Already have an account?{' '}
             <Link href="/student/login" className="text-accent font-bold hover:text-primary transition-colors">
               Log in
@@ -209,45 +209,48 @@ export default function Signup() {
           </div>
         </div>
 
-        {/* Right Image/Testimonial Section */}
-        <div ref={imageRef} className="hidden md:flex w-full md:w-1/2 bg-secondary p-12 relative overflow-hidden items-center justify-center border-l border-secondary">
+        {/* Right Info Section */}
+        <div ref={infoRef} className="hidden md:flex w-full md:w-1/2 bg-primary p-12 relative overflow-hidden items-center justify-center">
           <div className="absolute inset-0 z-0">
-            <Image src="/student-success.png" alt="Student Success" fill priority sizes="50vw" className="object-cover grayscale contrast-125 opacity-40 mix-blend-overlay" />
-            <div className="absolute inset-0 bg-secondary/40 mix-blend-multiply"></div>
+            <div className="absolute top-0 right-0 w-96 h-96 bg-secondary rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary rounded-full blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2"></div>
           </div>
           
-          <div className="relative z-10 max-w-md">
-            <h2 className="text-5xl font-black text-primary mb-10 leading-tight font-playfair tracking-tight">
-              Start speaking with absolute clarity and confidence.
+          <div className="relative z-10 max-w-md text-white">
+            <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-8 border border-white/20">
+              <Microscope className="w-8 h-8 text-accent" />
+            </div>
+            <h2 className="text-4xl font-black mb-8 leading-tight font-playfair tracking-tight text-white">
+              Advance your clinical expertise.
             </h2>
             
-            <ul className="space-y-6">
+            <ul className="space-y-5 mb-10">
               {[
-                'Access to expert speech therapists',
-                'Customized practice routines',
-                'Real-time progress tracking',
-                'Community support and peer learning'
+                'Access case-based clinical modules',
+                'Join live discussions with senior faculty',
+                'Download standard operating protocols',
+                'Earn an accredited fellowship certificate'
               ].map((item, i) => (
-                <li key={i} className="flex items-center text-primary font-sans text-lg font-bold">
-                  <div className="w-8 h-8 rounded-none bg-white border border-primary/20 flex items-center justify-center mr-4 flex-shrink-0">
+                <li key={i} className="flex items-center text-white/90 text-lg font-medium">
+                  <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center mr-4 flex-shrink-0">
                     <CheckCircle2 className="w-4 h-4 text-accent" />
                   </div>
-                  <span className="text-lg">{item}</span>
+                  <span className="text-base">{item}</span>
                 </li>
               ))}
             </ul>
 
-            <div className="mt-16 p-8 bg-white/80 backdrop-blur-md border-l-4 border-accent rounded-none shadow-sm">
-              <p className="text-primary text-lg italic mb-6 font-cormorant">
-                "HD Clarity completely changed my life. I went from avoiding public speaking to presenting at major conferences."
+            <div className="mt-12 p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg">
+              <p className="text-white/80 text-base italic mb-4 font-cormorant">
+                "This fellowship completely changed my approach to ART. I gained practical knowledge I couldn't find in textbooks."
               </p>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary text-white rounded-none flex items-center justify-center font-bold text-xl font-playfair">
-                  S
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-accent text-white rounded-full flex items-center justify-center font-bold text-lg">
+                  E
                 </div>
                 <div>
-                  <div className="text-primary font-bold font-sans">Sarah Jenkins</div>
-                  <div className="text-primary/70 text-xs font-sans uppercase tracking-widest mt-1">Product Manager</div>
+                  <div className="text-white font-bold text-sm">Dr. Emily Chen</div>
+                  <div className="text-accent/80 text-xs font-bold uppercase tracking-widest mt-0.5">Fellowship Alum</div>
                 </div>
               </div>
             </div>

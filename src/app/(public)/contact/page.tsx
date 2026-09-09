@@ -68,7 +68,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-primary mb-1">Email Us</h3>
-                  <p className="text-primary/70 mb-1 font-medium hover:text-accent cursor-pointer transition-colors">hridey@hdclarityspeech.com</p>
+                  <p className="text-primary/70 mb-1 font-medium hover:text-accent cursor-pointer transition-colors">hridey@shreefertilityacademy.com</p>
                   <p className="text-primary/60 text-sm">We reply within 24 hours</p>
                 </div>
               </div>

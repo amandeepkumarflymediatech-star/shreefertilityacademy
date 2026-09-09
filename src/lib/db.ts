@@ -1,7 +1,15 @@
-import { PrismaClient } from "@prisma/client";
-
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
-
-export const prisma = globalForPrisma.prisma || new PrismaClient();
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+// This is a temporary polyfill during the Sequelize migration.
+// Once all files are migrated to Sequelize, this file can be deleted again.
+export const prisma = new Proxy({}, {
+  get: function(target, prop) {
+    return new Proxy({}, {
+      get: function(t, p) {
+        return () => {
+          console.error(`Attempted to call prisma.${String(prop)}.${String(p)} but Prisma is uninstalled! Migrate this file to Sequelize.`);
+          if (p === 'findUnique' || p === 'findFirst') return null;
+          return [];
+        }
+      }
+    });
+  }
+}) as any;

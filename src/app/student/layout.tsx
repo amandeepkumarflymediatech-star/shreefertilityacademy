@@ -3,10 +3,9 @@
 import { useState } from 'react';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Calendar, CreditCard, Settings, LogOut, Bell, Search, Award, Menu, X, Users, Video, User as UserIcon } from "lucide-react";
+import { LayoutDashboard, Calendar, CreditCard, Settings, LogOut, Bell, Search, Award, Menu, X, Users, Video, User as UserIcon, BookOpen, Receipt } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
-import logoImg from "@/../public/logo.png";
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -15,11 +14,9 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
 
   const navItems = [
     { name: 'Dashboard', href: '/student', icon: LayoutDashboard },
-    // { name: 'Practice Hub', href: '/student/practice', icon: Award },
-    { name: 'My Class', href: '/student/myClass', icon: Video },
-    { name: 'My Sessions', href: '/student/appointments', icon: Calendar },
-    { name: 'All Tutors', href: '/student/allTutors', icon: Users },
-    { name: 'Subscription', href: '/student/subscriptions', icon: CreditCard },
+    { name: 'My Courses', href: '/student/courses', icon: BookOpen },
+    { name: 'Purchase History', href: '/student/purchases', icon: Receipt },
+    { name: 'Mentors', href: '/student/allTutors', icon: Users },
     { name: 'Profile', href: '/student/profile', icon: UserIcon },
     { name: 'Settings', href: '/student/settings', icon: Settings },
   ];
@@ -39,8 +36,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
       <aside className={`print:hidden fixed inset-y-0 left-0 w-72 bg-white flex flex-col z-50 transform transition-transform duration-300 md:relative md:translate-x-0 border-r border-secondary/30 shadow-2xl md:shadow-none ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-8 flex items-center justify-between border-b border-secondary/30">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <Image src={logoImg} alt="HD Clarity Logo" className="object-contain w-auto h-8" priority />
-            <span className="font-bold text-xl text-primary tracking-tight">Student<span className="text-accent">Portal</span></span>
+            <Image src="/logo.png" alt="Shree Fertility Academy Logo" width={150} height={40} className="object-contain w-auto h-10" priority />
           </Link>
           <button className="md:hidden text-primary/50 hover:text-primary transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
             <X size={24} />

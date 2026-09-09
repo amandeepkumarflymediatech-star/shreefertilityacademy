@@ -89,22 +89,21 @@ export default function BlogManagementClient({ posts }: { posts: BlogPost[] }) {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-b border-secondary/50 pb-6 mb-8">
+      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-secondary/20 mb-6">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black text-primary tracking-tight font-playfair">Blog Articles</h1>
-          <p className="text-primary/70 mt-2 font-sans text-base sm:text-lg">Create, edit, and publish platform content.</p>
+          <h1 className="text-2xl font-black text-primary font-playfair tracking-tight">Blog Articles</h1>
+          <p className="text-primary/60 text-sm mt-1">Create, edit, and publish platform content.</p>
         </div>
         <Link 
           href="/admin/blog/new"
-          className="px-8 py-3.5 bg-accent hover:bg-primary text-white font-bold uppercase tracking-wider text-sm transition-all rounded-xl shadow-sm hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 w-full sm:w-auto"
+          className="flex items-center gap-2 bg-accent hover:bg-primary text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all shadow-md hover:shadow-lg"
         >
-          <Plus size={18} />
-          New Post
+          <Plus size={18} /> New Post
         </Link>
       </div>
 
-      <div className="bg-white border border-secondary/30 rounded-3xl flex flex-col shadow-sm overflow-hidden mb-8">
-        <div className="p-6 border-b border-secondary/30 bg-secondary/5 flex flex-col sm:flex-row gap-4 justify-between items-center">
+      <div className="bg-white border border-secondary/20 rounded-2xl flex flex-col shadow-sm overflow-hidden mb-8">
+        <div className="p-6 border-b border-secondary/10 bg-secondary/5 flex flex-col sm:flex-row gap-4 justify-between items-center">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={18} />
             <input 

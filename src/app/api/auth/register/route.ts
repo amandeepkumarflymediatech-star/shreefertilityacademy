@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { User } from "@/models";
 import bcrypt from "bcryptjs";
 import { sendAdminNewStudentAlert } from "@/lib/email";
-
-const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
@@ -14,7 +12,7 @@ export async function POST(req: Request) {
     }
 
     // Check if user exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await User.findOne({
       where: { email },
     });
 
@@ -26,13 +24,11 @@ export async function POST(req: Request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role: role === 'TUTOR' ? 'TUTOR' : 'STUDENT',
-      },
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: role === 'TUTOR' ? 'TUTOR' : 'STUDENT',
     });
 
     if (user.role === "STUDENT") {

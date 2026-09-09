@@ -13,10 +13,14 @@ export default async function StudentSettingsPage() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans">
       
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-b border-secondary/30 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-b border-secondary/10 pb-6 relative">
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-secondary/5 rounded-full blur-3xl -z-10 pointer-events-none translate-x-1/4 -translate-y-1/2"></div>
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black text-primary tracking-tight font-playfair">Settings</h1>
-          <p className="text-primary/70 mt-2 font-sans text-base sm:text-lg">Manage your account security.</p>
+          <h4 className="text-accent font-bold tracking-widest uppercase mb-2 text-xs flex items-center gap-2">
+            Security
+          </h4>
+          <h1 className="text-4xl sm:text-5xl font-black text-primary tracking-tight font-playfair">Settings</h1>
+          <p className="text-primary/70 mt-3 font-sans text-lg">Manage your account security.</p>
         </div>
       </div>
 

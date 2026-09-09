@@ -4,7 +4,7 @@ import { Calendar } from 'lucide-react';
 import BlogListClient from './BlogListClient';
 
 export const metadata = {
-  title: 'Blog | HD Clarity Speech',
+  title: 'Blog | Shree Fertility Academy',
   description: 'Insights, tips, and stories about stuttering and speech therapy.',
 };
 

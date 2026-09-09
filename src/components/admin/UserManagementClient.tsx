@@ -3,7 +3,8 @@
 import { useState, useMemo } from "react";
 import { Users as UsersIcon, MoreVertical, Search, Filter, X, Edit, Trash2, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 import { createUser, updateUser, deleteUser } from "@/actions/admin-actions";
-import { Role } from "@prisma/client";
+
+type Role = "STUDENT" | "TUTOR" | "ADMIN";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
 

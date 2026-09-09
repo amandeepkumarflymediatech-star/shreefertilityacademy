@@ -86,13 +86,15 @@ export default function ContactManagementClient({ contacts }: { contacts: Contac
 
   return (
     <>
-      <div className="flex flex-col justify-between items-start border-b border-secondary/50 pb-6 mb-8">
-        <h1 className="text-3xl sm:text-4xl font-black text-primary tracking-tight font-playfair">Contact Messages</h1>
-        <p className="text-primary/70 mt-2 font-sans text-base sm:text-lg">View and manage inquiries from the public contact form.</p>
+      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-secondary/20 mb-6">
+        <div>
+          <h1 className="text-2xl font-black text-primary font-playfair tracking-tight">Contact Messages</h1>
+          <p className="text-primary/60 text-sm mt-1">View and manage inquiries from the public contact form.</p>
+        </div>
       </div>
 
-      <div className="bg-white border border-secondary/30 rounded-3xl flex flex-col shadow-sm overflow-hidden mb-8">
-        <div className="p-6 border-b border-secondary/30 bg-secondary/5 flex flex-col sm:flex-row gap-4 justify-between items-center">
+      <div className="bg-white border border-secondary/20 rounded-2xl flex flex-col shadow-sm overflow-hidden mb-8">
+        <div className="p-6 border-b border-secondary/10 bg-secondary/5 flex flex-col sm:flex-row gap-4 justify-between items-center">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={18} />
             <input 

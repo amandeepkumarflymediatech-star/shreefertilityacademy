@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, Calendar, Video, Settings, LogOut, Bell, Menu, X, CircleDollarSign, Users, User } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
-import logoImg from "@/../public/logo.png";
 
 export default function DashboardLayout({ children, user }: { children: React.ReactNode, user: any }) {
   const pathname = usePathname();
@@ -14,10 +13,8 @@ export default function DashboardLayout({ children, user }: { children: React.Re
 
   const navItems = [
     { name: 'Dashboard', href: '/tutor', icon: LayoutDashboard },
-    { name: 'Appointments', href: '/tutor/appointments', icon: Calendar },
-    // { name: 'Earnings', href: '/tutor/earnings', icon: CircleDollarSign },
     { name: 'My Students', href: '/tutor/students', icon: Users },
-    { name: 'All Tutors', href: '/tutor/allTutors', icon: Users },
+    { name: 'Mentors', href: '/tutor/allTutors', icon: Users },
     { name: 'Profile', href: '/tutor/profile', icon: User },
     { name: 'Settings', href: '/tutor/settings', icon: Settings },
   ];
@@ -40,8 +37,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
       <aside className={`fixed inset-y-0 left-0 w-72 bg-white flex flex-col z-50 transform transition-transform duration-300 md:relative md:translate-x-0 border-r border-secondary/30 shadow-xl md:shadow-none ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6 flex items-center justify-between border-b border-secondary/20">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <Image src={logoImg} alt="HD Clarity Logo" className="object-contain w-auto h-8" priority />
-            <span className="font-bold text-xl text-primary tracking-tight">Tutor<span className="text-accent">Portal</span></span>
+            <Image src="/logo.png" alt="Shree Fertility Academy Logo" width={150} height={40} className="object-contain w-auto h-10" priority />
           </Link>
           <button className="md:hidden text-primary/60 hover:text-primary transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
             <X size={24} />

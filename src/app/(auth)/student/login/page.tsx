@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import logoImg from "@/../public/logo.png";
-import { ArrowRight, Mail, Lock, CheckCircle2, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { ArrowRight, Mail, Lock, CheckCircle2, Eye, EyeOff, ArrowLeft, Microscope } from 'lucide-react';
 import gsap from 'gsap';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -22,7 +20,7 @@ function LoginContent() {
   const router = useRouter();
 
   const formRef = useRef(null);
-  const imageRef = useRef(null);
+  const infoRef = useRef(null);
 
   useEffect(() => {
     if (urlError) {
@@ -37,7 +35,7 @@ function LoginContent() {
       { opacity: 1, x: 0, duration: 1, ease: 'power3.out' }
     );
     gsap.fromTo(
-      imageRef.current,
+      infoRef.current,
       { opacity: 0, x: 50 },
       { opacity: 1, x: 0, duration: 1, ease: 'power3.out', delay: 0.2 }
     );
@@ -60,7 +58,6 @@ function LoginContent() {
         setStatus('error');
         setErrorMessage(res.error);
       } else {
-        // Fetch session to determine role
         const sessionRes = await fetch('/api/auth/session');
         const session = await sessionRes.json();
 
@@ -80,68 +77,66 @@ function LoginContent() {
     }
   };
 
-
-
   return (
-    <div className="min-h-screen bg-secondary flex items-center justify-center p-4 sm:p-8 font-sans">
-      <div className="max-w-6xl w-full bg-white rounded-none shadow-xl overflow-hidden flex flex-col md:flex-row border border-secondary">
+    <div className="min-h-screen bg-primary-bg flex items-center justify-center p-4 sm:p-8 font-sans selection:bg-accent selection:text-white">
+      <div className="max-w-6xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row border border-secondary/10">
 
         {/* Left Form Section */}
         <div ref={formRef} className="w-full md:w-1/2 p-8 sm:p-12 md:p-16 flex flex-col justify-center bg-white relative">
-          <Link href="/login" className="inline-flex items-center gap-2 text-primary/60 hover:text-accent font-bold text-xs tracking-widest uppercase mb-8 transition-colors self-start">
-            <ArrowLeft size={16} /> Back to Home
+          <Link href="/login" className="inline-flex items-center gap-2 text-primary/60 hover:text-accent font-bold text-xs tracking-widest uppercase mb-10 transition-colors self-start bg-secondary/5 px-4 py-2 rounded-full">
+            <ArrowLeft size={16} /> Back
           </Link>
 
           <div className="mb-10 text-center md:text-left">
-            <h1 className="text-3xl sm:text-5xl font-black text-primary mb-3 font-playfair tracking-tight">
-              Welcome Back
+            <h1 className="text-3xl sm:text-4xl font-black text-primary font-playfair mb-3 tracking-tight">
+              Student Login
             </h1>
             <p className="text-primary/70 font-sans text-lg">
-              Sign in to your dashboard to continue.
+              Sign in to your learning dashboard to access video courses and live sessions.
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-8">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-xs font-bold text-primary uppercase tracking-widest mb-3">Email address</label>
+              <label className="block text-xs font-bold text-primary uppercase tracking-widest mb-2">Email address</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-0 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-primary/50" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-primary/40" />
                 </div>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-8 pr-4 py-3 border-0 border-b-2 border-secondary text-primary bg-transparent focus:ring-0 focus:border-accent transition-colors duration-200 outline-none text-lg placeholder-primary/30"
-                  placeholder="you@example.com"
+                  className="block w-full pl-11 pr-4 py-3 border border-secondary/20 rounded-xl text-primary bg-secondary/5 focus:ring-0 focus:border-accent focus:bg-white transition-colors duration-200 outline-none placeholder-primary/30"
+                  placeholder="doctor@clinic.com"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <label className="block text-xs font-bold text-primary uppercase tracking-widest">Password</label>
-                <Link href="/forgot-password" className="text-xs font-bold text-accent hover:text-primary transition-colors uppercase tracking-widest">
-                  Forgot?
+                <Link href="/forgot-password" className="text-xs font-bold text-accent hover:text-primary transition-colors tracking-wide">
+                  Forgot Password?
                 </Link>
               </div>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-0 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-primary/50" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-primary/40" />
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-8 pr-10 py-3 border-0 border-b-2 border-secondary text-primary bg-transparent focus:ring-0 focus:border-accent transition-colors duration-200 outline-none text-lg placeholder-primary/30"
+                  className="block w-full pl-11 pr-10 py-3 border border-secondary/20 rounded-xl text-primary bg-secondary/5 focus:ring-0 focus:border-accent focus:bg-white transition-colors duration-200 outline-none placeholder-primary/30"
                   placeholder="••••••••"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-2 flex items-center text-primary/50 hover:text-primary transition-colors focus:outline-none"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-primary/40 hover:text-primary/70 transition-colors focus:outline-none"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -149,20 +144,25 @@ function LoginContent() {
             </div>
 
             {status === 'error' && (
-              <div className="p-4 bg-red-50 border border-accent text-accent text-sm rounded-none">
-                {errorMessage}
+              <div className="p-4 bg-accent/10 border border-accent/20 text-accent text-sm rounded-xl flex items-center gap-2">
+                <span className="font-bold">Error:</span> {errorMessage}
               </div>
             )}
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 mt-8">
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="w-full cursor-pointer flex items-center justify-center gap-2 bg-accent hover:bg-primary text-white font-bold py-5 px-8 transition-colors duration-200 shadow-sm group disabled:opacity-70 mt-8 uppercase tracking-widest text-sm rounded-none"
+                className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-secondary text-white font-bold uppercase tracking-widest text-sm py-4 px-8 rounded-xl transition-all duration-200 shadow-md group disabled:opacity-70"
               >
                 <span>{status === 'loading' ? 'Signing in...' : 'Sign In'}</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
+
+              <div className="relative my-2">
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-secondary/20"></div></div>
+                <div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-primary/50 text-xs uppercase tracking-widest font-bold">Or</span></div>
+              </div>
 
               <button
                 type="button"
@@ -170,7 +170,7 @@ function LoginContent() {
                   document.cookie = `intendedRole=${role}; path=/; max-age=300`;
                   signIn('google', { callbackUrl: '/auth-callback' });
                 }}
-                className="w-full cursor-pointer bg-white border-2 border-secondary text-primary py-3.5 font-bold uppercase tracking-widest text-xs hover:border-primary transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-white border border-secondary/20 rounded-xl text-primary py-3.5 font-bold text-sm tracking-widest uppercase hover:border-primary hover:bg-secondary/5 transition-colors flex items-center justify-center gap-3"
               >
                 <svg viewBox="0 0 24 24" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -178,40 +178,42 @@ function LoginContent() {
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                 </svg>
-                Continue with Google
+                Sign in with Google
               </button>
             </div>
           </form>
 
-          <div className="mt-8 text-center text-primary/70 font-sans text-sm">
+          <div className="mt-8 text-center text-primary/70 text-sm">
             Don't have an account?{' '}
             <Link href="/student/signup" className="text-accent font-bold hover:text-primary transition-colors">
-              Sign up
+              Sign Up for Courses
             </Link>
           </div>
-
         </div>
 
-        {/* Right Image/Testimonial Section */}
-        <div ref={imageRef} className="hidden md:flex w-full md:w-1/2 bg-secondary p-12 relative overflow-hidden items-center justify-center border-l border-secondary">
+        {/* Right Info Section */}
+        <div ref={infoRef} className="hidden md:flex w-full md:w-1/2 bg-primary p-12 relative overflow-hidden items-center justify-center">
           <div className="absolute inset-0 z-0">
-            <Image src="/student-learning.png" alt="Student Learning" fill priority sizes="50vw" className="object-cover grayscale contrast-125 opacity-40 mix-blend-overlay" />
-            <div className="absolute inset-0 bg-secondary/40 mix-blend-multiply"></div>
+            <div className="absolute top-0 right-0 w-96 h-96 bg-secondary rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary rounded-full blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2"></div>
           </div>
 
-          <div className="relative z-10 max-w-md">
-            <h2 className="text-5xl font-black text-primary mb-10 leading-tight font-playfair tracking-tight">
-              Pick up exactly where you left off.
+          <div className="relative z-10 max-w-md text-white">
+            <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-8 border border-white/20">
+              <Microscope className="w-8 h-8 text-accent" />
+            </div>
+            <h2 className="text-4xl font-black mb-8 leading-tight font-playfair tracking-tight text-white">
+              Resume Your Clinical Journey.
             </h2>
 
-            <ul className="space-y-6">
+            <ul className="space-y-5">
               {[
-                'Review your upcoming sessions',
-                'Access your custom curriculum',
-                'Track your progress milestones',
+                'Watch pre-recorded video courses',
+                'Access your learning curriculum',
+                'Track your progress',
               ].map((item, i) => (
-                <li key={i} className="flex items-center text-primary font-sans text-lg font-bold">
-                  <div className="w-8 h-8 rounded-none bg-white border border-primary/20 flex items-center justify-center mr-4 flex-shrink-0">
+                <li key={i} className="flex items-center text-white/90 text-lg font-medium">
+                  <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center mr-4 flex-shrink-0">
                     <CheckCircle2 className="w-4 h-4 text-accent" />
                   </div>
                   {item}
@@ -219,17 +221,17 @@ function LoginContent() {
               ))}
             </ul>
 
-            <div className="mt-16 p-8 bg-white/80 backdrop-blur-md border-l-4 border-accent rounded-none shadow-sm">
-              <p className="text-primary text-lg italic mb-6 font-cormorant">
-                "The dashboard makes it so incredibly easy to track my progress and join my scheduled sessions with a single click."
+            <div className="mt-12 p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg">
+              <p className="text-white/80 text-base italic mb-4 font-cormorant">
+                "The learning dashboard makes it incredibly easy to access video courses and track my progress."
               </p>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary text-white rounded-none flex items-center justify-center font-bold text-xl font-playfair">
-                  M
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-accent text-white rounded-full flex items-center justify-center font-bold text-lg">
+                  S
                 </div>
                 <div>
-                  <div className="text-primary font-bold font-sans">Marcus Chen</div>
-                  <div className="text-primary/70 text-xs font-sans uppercase tracking-widest mt-1">Design Lead</div>
+                  <div className="text-white font-bold text-sm">Dr. Sarah Jenkins</div>
+                  <div className="text-accent/80 text-xs font-bold uppercase tracking-widest mt-0.5">Course Alum</div>
                 </div>
               </div>
             </div>
@@ -243,7 +245,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-secondary flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-primary-bg flex items-center justify-center text-primary font-bold">Loading...</div>}>
       <LoginContent />
     </Suspense>
   );

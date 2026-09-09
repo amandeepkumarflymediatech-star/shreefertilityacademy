@@ -1,15 +1,14 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import SequelizeAdapter from "@next-auth/sequelize-adapter";
+import { sequelize } from "./sequelize";
+import { User } from "../models";
 import bcrypt from "bcryptjs";
 
-// Initialize Prisma
-const prisma = new PrismaClient();
-
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
+  // @ts-ignore - The adapter's User model typing expects specific properties
+  adapter: SequelizeAdapter(sequelize, { models: { User: sequelize.models.User } }) as any,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
@@ -28,7 +27,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        const user = await prisma.user.findUnique({
+        const user = await User.findOne({
           where: { email: credentials.email },
         });
 
@@ -84,7 +83,7 @@ export const authOptions: NextAuthOptions = {
           const intendedRole = cookieStore.get('intendedRole')?.value;
 
           if (intendedRole && user.email) {
-            const dbUser = await prisma.user.findUnique({
+            const dbUser = await User.findOne({
               where: { email: user.email }
             });
 
@@ -110,7 +109,7 @@ export const authOptions: NextAuthOptions = {
     },
     async jwt({ token, user, trigger }: any) {
       if (trigger === "update" && token.sub) {
-        const dbUser = await prisma.user.findUnique({
+        const dbUser = await User.findOne({
           where: { id: token.sub }
         });
         if (dbUser) {
@@ -121,7 +120,7 @@ export const authOptions: NextAuthOptions = {
       }
 
       if (user) {
-        const dbUser = await prisma.user.findUnique({
+        const dbUser = await User.findOne({
           where: { email: user.email }
         });
         if (dbUser) {
@@ -157,9 +156,8 @@ export const authOptions: NextAuthOptions = {
         const intendedRole = cookieStore.get('intendedRole')?.value;
         
         if (intendedRole && ['STUDENT', 'TUTOR'].includes(intendedRole)) {
-          await prisma.user.update({
+          await User.update({ role: intendedRole as any }, {
             where: { id: user.id },
-            data: { role: intendedRole as any },
           });
           console.log(`Successfully updated newly created Google user ${user.email} to role: ${intendedRole}`);
         }

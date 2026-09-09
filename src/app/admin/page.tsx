@@ -1,10 +1,14 @@
 import { Users, TrendingUp, DollarSign, Activity, CreditCard } from "lucide-react";
-import { prisma } from "@/lib/db";
+import { User, Membership, LiveClass, Order } from "@/models";
+import { Op } from "sequelize";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import RevenueChart from "@/components/admin/RevenueChart";
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions);
@@ -14,14 +18,14 @@ export default async function AdminDashboard() {
   }
 
   const [totalUsers, activeMemberships, activeClasses, completedClasses] = await Promise.all([
-    prisma.user.count(),
-    prisma.membership.count({ where: { status: 'ACTIVE' } }),
-    prisma.liveClass.count({ where: { status: 'SCHEDULED' } }),
-    prisma.liveClass.count({ where: { status: 'COMPLETED' } })
+    User.count(),
+    Membership.count({ where: { status: 'ACTIVE' } }),
+    LiveClass.count({ where: { status: 'SCHEDULED' } }),
+    LiveClass.count({ where: { status: 'COMPLETED' } })
   ]);
 
   // Revenue calculation from paid orders
-  const orders = await prisma.order.findMany({ where: { status: 'PAID' } });
+  const orders = await Order.findAll({ where: { status: 'PAID' } });
   const monthlyRevenue = orders.reduce((total, order) => total + order.amount, 0);
 
   const stats = [
@@ -33,12 +37,12 @@ export default async function AdminDashboard() {
 
   // Get all orders for the current year to calculate monthly revenue
   const currentYear = new Date().getFullYear();
-  const yearlyOrders = await prisma.order.findMany({
+  const yearlyOrders = await Order.findAll({
     where: { 
       status: 'PAID',
       createdAt: {
-        gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
-        lte: new Date(`${currentYear}-12-31T23:59:59.999Z`)
+        [Op.gte]: new Date(`${currentYear}-01-01T00:00:00.000Z`),
+        [Op.lte]: new Date(`${currentYear}-12-31T23:59:59.999Z`)
       }
     }
   });
@@ -52,16 +56,21 @@ export default async function AdminDashboard() {
   const maxRevenue = Math.max(...monthlyRevenueData, 100);
 
   // Fetch recent activity
-  const recentOrders = await prisma.order.findMany({
-    take: 5,
-    orderBy: { createdAt: 'desc' },
-    include: { student: true, membership: true }
+  const recentOrdersDb = await Order.findAll({
+    limit: 5,
+    order: [['createdAt', 'DESC']],
+    include: [
+      { model: User, as: 'student' },
+      { model: Membership, as: 'membership' }
+    ]
   });
+  const recentOrders = recentOrdersDb as any[];
 
-  const recentUsers = await prisma.user.findMany({
-    take: 5,
-    orderBy: { createdAt: 'desc' }
+  const recentUsersDb = await User.findAll({
+    limit: 5,
+    order: [['createdAt', 'DESC']]
   });
+  const recentUsers = recentUsersDb as any[];
 
   const formatTimeAgo = (date: Date) => {
     const hours = Math.floor((new Date().getTime() - date.getTime()) / (1000 * 60 * 60));

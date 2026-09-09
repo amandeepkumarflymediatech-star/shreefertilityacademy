@@ -13,17 +13,17 @@ export default function TermsOfServicePage() {
         <h1 className="text-4xl md:text-5xl font-black text-primary mb-8 font-playfair">Terms of Service</h1>
         <div className="prose prose-lg text-primary/80 space-y-6">
           <p>
-            Welcome to HD Clarity Speech. These Terms of Service outline the rules and regulations for the use of our website and services.
+            Welcome to Shree Fertility Academy. These Terms of Service outline the rules and regulations for the use of our website and services.
           </p>
 
           <h2 className="text-2xl font-bold text-primary mt-12 mb-4 font-playfair">Acceptance of Terms</h2>
           <p>
-            By accessing this website, we assume you accept these terms and conditions. Do not continue to use HD Clarity Speech if you do not agree to take all of the terms and conditions stated on this page.
+            By accessing this website, we assume you accept these terms and conditions. Do not continue to use Shree Fertility Academy if you do not agree to take all of the terms and conditions stated on this page.
           </p>
 
           <h2 className="text-2xl font-bold text-primary mt-12 mb-4 font-playfair">License</h2>
           <p>
-            Unless otherwise stated, HD Clarity Speech and/or its licensors own the intellectual property rights for all material on HD Clarity Speech. All intellectual property rights are reserved. You may access this from HD Clarity Speech for your own personal use subjected to restrictions set in these terms and conditions.
+            Unless otherwise stated, Shree Fertility Academy and/or its licensors own the intellectual property rights for all material on Shree Fertility Academy. All intellectual property rights are reserved. You may access this from Shree Fertility Academy for your own personal use subjected to restrictions set in these terms and conditions.
           </p>
 
           <h2 className="text-2xl font-bold text-primary mt-12 mb-4 font-playfair">User Responsibilities</h2>
@@ -33,7 +33,7 @@ export default function TermsOfServicePage() {
           
           <h2 className="text-2xl font-bold text-primary mt-12 mb-4 font-playfair">Contact</h2>
           <p>
-            If you have any questions about these Terms, please contact us at hridey@hdclarityspeech.com.
+            If you have any questions about these Terms, please contact us at hridey@shreefertilityacademy.com.
           </p>
         </div>
       </div>

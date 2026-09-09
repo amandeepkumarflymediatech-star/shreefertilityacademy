@@ -1,6 +1,6 @@
 "use server"
 
-import { prisma } from "@/lib/db";
+import { User } from "@/models";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -52,9 +52,7 @@ export async function updateProfile(formData: FormData) {
     imageUrl = `/uploads/${fileName}`;
   }
 
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: { 
+  await User.update({ 
       name, 
       email,
       ...(bio !== null && { bio }),
@@ -68,7 +66,8 @@ export async function updateProfile(formData: FormData) {
       ...(teachingAges !== null && { teachingAges }),
       ...(teachingStyle !== null && { teachingStyle }),
       ...(imageUrl && { image: imageUrl })
-    }
+    }, {
+    where: { id: session.user.id }
   });
 
   revalidatePath("/student/profile");
@@ -92,7 +91,7 @@ export async function updateSecurity(formData: FormData) {
     throw new Error("Passwords are required");
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await User.findOne({
     where: { id: session.user.id }
   });
 
@@ -107,9 +106,8 @@ export async function updateSecurity(formData: FormData) {
 
   const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: { password: hashedPassword }
+  await User.update({ password: hashedPassword }, {
+    where: { id: session.user.id }
   });
 
   revalidatePath("/student/settings");

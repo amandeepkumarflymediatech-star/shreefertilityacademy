@@ -68,7 +68,7 @@ export default async function TutorOnboardingPage() {
           </h1>
           
           <p className="text-lg text-primary/70 font-sans leading-relaxed mb-8">
-            Thank you for applying to be a mentor at HD Clarity Speech. Your application has been received and is currently under review by our administration team.
+            Thank you for applying to be a mentor at Shree Fertility Academy. Your application has been received and is currently under review by our administration team.
           </p>
 
           <div className="bg-secondary/50 rounded-2xl p-6 text-left mb-10 border border-secondary">

@@ -1,26 +1,28 @@
 import React from 'react';
 import HeroSection from './_components/home/HeroSection';
-import StatsBanner from './_components/home/StatsBanner';
-import FeaturedCourses from './_components/home/FeaturedCourses';
-import FeaturesGrid from './_components/home/FeaturesGrid';
-import EmbryoProgression from './_components/home/EmbryoProgression';
-import FacultySpotlight from './_components/home/FacultySpotlight';
-import UpcomingBootcamps from './_components/home/UpcomingBootcamps';
-import TestimonialsSection from './_components/home/TestimonialsSection';
-import CTASection from './_components/home/CTASection';
+import IntroSection from './_components/home/IntroSection';
+import AudienceSection from './_components/home/AudienceSection';
+import FeaturesBanner from './_components/home/FeaturesBanner';
+import CourseDetails from './_components/home/CourseDetails';
+import WhyChooseSection from './_components/home/WhyChooseSection';
+import MentorHighlight from './_components/home/MentorHighlight';
+import ProgramJourney from './_components/home/ProgramJourney';
+import FaqAndForm from './_components/home/FaqAndForm';
+import FooterCta from './_components/home/FooterCta';
 
-export default function HomePage() {
+export default function PublicHomePage() {
   return (
-    <div className="min-h-screen bg-white font-inter selection:bg-blue-600 selection:text-white">
+    <main className="w-full flex flex-col items-center bg-primary-bg overflow-x-hidden">
       <HeroSection />
-      <StatsBanner />
-      <FeaturedCourses />
-      <FeaturesGrid />
-      <EmbryoProgression />
-      <FacultySpotlight />
-      <UpcomingBootcamps />
-      <TestimonialsSection />
-      <CTASection />
-    </div>
+      <IntroSection />
+      <AudienceSection />
+      <FeaturesBanner />
+      <CourseDetails />
+      <WhyChooseSection />
+      <MentorHighlight />
+      <ProgramJourney />
+      <FaqAndForm />
+      <FooterCta />
+    </main>
   );
 }

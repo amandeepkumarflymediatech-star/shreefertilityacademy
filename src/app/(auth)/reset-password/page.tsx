@@ -154,7 +154,7 @@ export default function ResetPasswordPage() {
         
         <div className="mb-10 text-center">
           <Link href="/" className="mb-8 inline-block">
-            <Image src={logoImg} alt="HD Clarity Logo" className="object-contain w-auto h-16 mx-auto" priority />
+            <Image src={logoImg} alt="Shree Fertility Academy Logo" className="object-contain w-auto h-16 mx-auto" priority />
           </Link>
           <h1 className="text-3xl font-black text-primary mb-3 tracking-tight font-playfair">
             Create New Password

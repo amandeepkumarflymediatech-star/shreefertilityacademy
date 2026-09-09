@@ -89,7 +89,7 @@ export default function BecomeTutorPage() {
           We're Hiring Speech Mentors
         </div>
         <h1 className="text-4xl md:text-6xl font-black text-primary font-playfair tracking-tight mb-6 leading-tight max-w-4xl mx-auto">
-          Empower voices and build your career with <span className="text-accent">HD Clarity</span>.
+          Empower voices and build your career with <span className="text-accent">Shree Fertility Academy</span>.
         </h1>
         <p className="text-lg md:text-xl text-primary/80 font-sans max-w-2xl mx-auto leading-relaxed">
           Join our network of elite speech therapists and make a profound impact on students worldwide from the comfort of your home.
@@ -122,7 +122,7 @@ export default function BecomeTutorPage() {
             <div className="relative z-10">
               <h3 className="text-2xl font-black mb-4 font-playfair tracking-tight">"The best platform for speech mentors."</h3>
               <p className="text-primary/90 mb-6 italic text-sm md:text-base font-cormorant text-lg">
-                "Working with HD Clarity has given me the flexibility to travel while continuing my practice. The platform handles all the billing and scheduling seamlessly."
+                "Working with Shree Fertility Academy has given me the flexibility to travel while continuing my practice. The platform handles all the billing and scheduling seamlessly."
               </p>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-primary text-white flex items-center justify-center font-bold text-xl font-playfair">

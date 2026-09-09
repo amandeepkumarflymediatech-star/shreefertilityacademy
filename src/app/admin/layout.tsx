@@ -22,7 +22,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Tutor Applications', href: '/admin/tutors', icon: GraduationCap },
-    { name: 'Enrollments', href: '/admin/enrollments', icon: BookOpen },
+    { name: 'Courses (LMS)', href: '/admin/courses', icon: BookOpen },
+    { name: 'Enrollments', href: '/admin/enrollments', icon: Users },
     { name: 'Pricing Tiers', href: '/admin/pricing', icon: CreditCard },
     { name: 'Payments', href: '/admin/payments', icon: Banknote },
     { name: 'Coupons', href: '/admin/coupons', icon: Tag },
@@ -47,7 +48,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className={`fixed inset-y-0 left-0 w-72 bg-primary flex flex-col shadow-2xl z-50 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} border-r border-accent/20`}>
         <div className="p-6 flex items-center justify-between border-b border-accent/20">
           <div className="flex items-center gap-3">
-            <Image src={logoImg} alt="HD Clarity Logo" className="object-contain w-auto h-8 brightness-200" priority />
+            <Image src={logoImg} alt="Shree Fertility Academy Logo" className="object-contain w-auto h-8 brightness-200" priority />
             <span className="font-bold text-xl text-white tracking-tight">Admin<span className="text-accent">Portal</span></span>
           </div>
           <button 
@@ -59,7 +60,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         <div className="px-4 py-6 flex-1 overflow-y-auto min-h-0 scrollbar-thin scrollbar-thumb-accent/20 scrollbar-track-transparent">
-          <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-4 px-3">Overview</p>
+          <p className="text-xs font-bold text-white/50 uppercase tracking-widest mb-4 px-3">Overview</p>
           <nav className="space-y-1.5">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
@@ -70,7 +71,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   href={item.href}
                   className={`flex items-center gap-3 px-4 py-3 rounded-sm transition-all duration-200 group ${isActive
                       ? 'bg-accent text-white shadow-[0_0_15px_-3px_rgba(175,11,44,0.4)]'
-                      : 'text-secondary/80 hover:bg-white/10 hover:text-white'
+                      : 'text-white/70 hover:bg-white/10 hover:text-white'
                     }`}
                 >
                   <Icon size={20} className={`transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
@@ -84,7 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="mt-auto p-4 border-t border-accent/20">
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
-            className="flex w-full items-center gap-3 px-4 py-3 rounded-sm text-secondary hover:bg-accent/20 hover:text-accent transition-all duration-200 group"
+            className="flex w-full items-center gap-3 px-4 py-3 rounded-sm text-white/70 hover:bg-white/10 hover:text-white transition-all duration-200 group"
           >
             <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
             <span className="font-bold text-sm uppercase tracking-wide">Logout</span>

@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { User, PasswordResetToken } from "@/models";
 import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
@@ -13,7 +11,7 @@ export async function POST(req: Request) {
     }
 
     // Find token in DB
-    const resetTokenRecord = await prisma.passwordResetToken.findUnique({
+    const resetTokenRecord = await PasswordResetToken.findOne({
       where: { token },
     });
 
@@ -30,13 +28,12 @@ export async function POST(req: Request) {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Update user password
-    await prisma.user.update({
+    await User.update({ password: hashedPassword }, {
       where: { email: resetTokenRecord.email },
-      data: { password: hashedPassword },
     });
 
     // Delete used token
-    await prisma.passwordResetToken.delete({
+    await PasswordResetToken.destroy({
       where: { id: resetTokenRecord.id },
     });
 

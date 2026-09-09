@@ -2,7 +2,8 @@ import { Calendar, Video, Clock, Users, ArrowRight, PlayCircle } from "lucide-re
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { LiveClass, ClassEnrollment } from "@/models";
+import { Op } from "sequelize";
 import { redirect } from "next/navigation";
 
 export default async function TutorDashboard() {
@@ -21,24 +22,28 @@ export default async function TutorDashboard() {
   endOfDay.setHours(23,59,59,999);
 
   // Fetch Stats
-  const todayClassesCount = await prisma.liveClass.count({
+  const todayClassesCount = await LiveClass.count({
     where: {
       tutorId,
-      scheduledAt: { gte: startOfDay, lte: endOfDay },
-      status: { not: 'CANCELLED' }
+      scheduledAt: { [Op.gte]: startOfDay, [Op.lte]: endOfDay },
+      status: { [Op.ne]: 'CANCELLED' }
     }
   });
 
-  const completedClassesCount = await prisma.liveClass.count({
+  const completedClassesCount = await LiveClass.count({
     where: { tutorId, status: 'COMPLETED' },
   });
 
-  const activeStudentsGroup = await prisma.classEnrollment.findMany({
-    where: { session: { tutorId } },
-    select: { studentId: true },
-    distinct: ['studentId']
+  const activeStudentsGroup = await ClassEnrollment.count({
+    include: [{
+      model: LiveClass,
+      as: 'session',
+      where: { tutorId }
+    }],
+    distinct: true,
+    col: 'studentId'
   });
-  const activeStudents = activeStudentsGroup.length;
+  const activeStudents = activeStudentsGroup;
 
   const stats = [
     { name: 'Today\'s Classes', value: todayClassesCount.toString(), icon: Calendar },
@@ -47,17 +52,18 @@ export default async function TutorDashboard() {
   ];
 
   // Fetch upcoming sessions for today
-  const upcomingClassesDb = await prisma.liveClass.findMany({
+  const upcomingClassesDb = await LiveClass.findAll({
     where: {
       tutorId,
-      scheduledAt: { gte: new Date(), lte: endOfDay },
-      status: { notIn: ['CANCELLED', 'COMPLETED'] }
+      scheduledAt: { [Op.gte]: new Date(), [Op.lte]: endOfDay },
+      status: { [Op.notIn]: ['CANCELLED', 'COMPLETED'] }
     },
-    orderBy: { scheduledAt: 'asc' },
-    take: 3,
-    include: {
-      enrollments: true
-    }
+    order: [['scheduledAt', 'ASC']],
+    limit: 3,
+    include: [{
+      model: ClassEnrollment,
+      as: 'enrollments'
+    }]
   });
 
   const upcomingClasses = upcomingClassesDb.map(c => {
@@ -65,7 +71,7 @@ export default async function TutorDashboard() {
     return {
       id: c.id,
       title: c.title,
-      studentCount: c.enrollments.length,
+      studentCount: (c as any).enrollments ? (c as any).enrollments.length : 0,
       time: `${formatTime(c.scheduledAt)}`,
       meetingUrl: c.meetingUrl
     }
@@ -107,10 +113,10 @@ export default async function TutorDashboard() {
           </div>
           <div className="flex-1 p-2 min-h-[300px]">
             {upcomingClasses.length === 0 ? (
-              <div className="flex items-center justify-center h-full flex-col text-primary/40">
+              <div className="flex items-center justify-center h-full flex-col text-primary/40 p-8">
                 <Calendar size={48} className="mb-4 opacity-50" />
                 <p className="font-bold">No more classes today!</p>
-                <p className="text-sm">Enjoy your free time.</p>
+                <p className="text-sm text-center mt-2">Enjoy your free time or prepare for upcoming sessions.</p>
               </div>
             ) : (
               upcomingClasses.map((cls) => (
@@ -141,6 +147,56 @@ export default async function TutorDashboard() {
                 </div>
               ))
             )}
+          </div>
+        </div>
+
+        {/* Quick Actions & Activity */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+          <div className="bg-white border border-secondary/30 rounded-3xl p-8 shadow-sm">
+            <h3 className="text-xl font-black text-primary font-playfair tracking-tight mb-6">Quick Actions</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <Link href="/tutor/classes/new" className="flex flex-col items-center justify-center p-6 bg-secondary/5 hover:bg-primary hover:text-white text-primary rounded-2xl transition-all group shadow-sm hover:-translate-y-1">
+                <Video size={28} className="mb-3 text-accent group-hover:text-white transition-colors" />
+                <span className="font-bold text-sm text-center">Schedule Class</span>
+              </Link>
+              <Link href="/tutor/students" className="flex flex-col items-center justify-center p-6 bg-secondary/5 hover:bg-primary hover:text-white text-primary rounded-2xl transition-all group shadow-sm hover:-translate-y-1">
+                <Users size={28} className="mb-3 text-accent group-hover:text-white transition-colors" />
+                <span className="font-bold text-sm text-center">My Students</span>
+              </Link>
+              <Link href="/tutor/profile" className="flex flex-col items-center justify-center p-6 bg-secondary/5 hover:bg-primary hover:text-white text-primary rounded-2xl transition-all group shadow-sm hover:-translate-y-1">
+                <Calendar size={28} className="mb-3 text-accent group-hover:text-white transition-colors" />
+                <span className="font-bold text-sm text-center">Update Profile</span>
+              </Link>
+            </div>
+          </div>
+          
+          <div className="bg-primary border border-secondary/30 rounded-3xl p-8 shadow-lg text-white relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+             <h3 className="text-xl font-black font-playfair tracking-tight mb-6 flex items-center justify-between">
+               Recent Activity
+               <Link href="/tutor/students" className="text-xs font-sans font-bold uppercase tracking-widest text-accent hover:text-white transition-colors">See all <ArrowRight size={14} className="inline ml-1" /></Link>
+             </h3>
+             
+             <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold">
+                    1
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold">New Student Enrollment</p>
+                    <p className="text-xs text-white/60 mt-1">A new student has registered for your upcoming class.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/70 font-bold">
+                    2
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold">Profile Updated</p>
+                    <p className="text-xs text-white/60 mt-1">Your teaching headline was successfully updated.</p>
+                  </div>
+                </div>
+             </div>
           </div>
         </div>
         

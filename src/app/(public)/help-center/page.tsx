@@ -13,7 +13,7 @@ export default function HelpCenterPage() {
         <h1 className="text-4xl md:text-5xl font-black text-primary mb-8 font-playfair">Help Center</h1>
         <div className="prose prose-lg text-primary/80">
           <p>
-            Welcome to the HD Clarity Speech Help Center. If you have any questions or need assistance, please feel free to reach out to us using the contact information below.
+            Welcome to the Shree Fertility Academy Help Center. If you have any questions or need assistance, please feel free to reach out to us using the contact information below.
           </p>
           
           <h2 className="text-2xl font-bold text-primary mt-12 mb-4 font-playfair">Frequently Asked Questions</h2>
@@ -37,7 +37,7 @@ export default function HelpCenterPage() {
             If you need further assistance, please reach out to our support team:
           </p>
           <ul className="list-disc pl-6 space-y-2 mt-4">
-            <li>Email: hridey@hdclarityspeech.com</li>
+            <li>Email: hridey@shreefertilityacademy.com</li>
             <li>Phone: +91 83608-58527</li>
           </ul>
         </div>

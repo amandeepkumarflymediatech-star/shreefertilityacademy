@@ -13,7 +13,7 @@ export default function PrivacyPolicyPage() {
         <h1 className="text-4xl md:text-5xl font-black text-primary mb-8 font-playfair">Privacy Policy</h1>
         <div className="prose prose-lg text-primary/80 space-y-6">
           <p>
-            At HD Clarity Speech, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services.
+            At Shree Fertility Academy, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services.
           </p>
 
           <h2 className="text-2xl font-bold text-primary mt-12 mb-4 font-playfair">Information We Collect</h2>
@@ -28,7 +28,7 @@ export default function PrivacyPolicyPage() {
 
           <h2 className="text-2xl font-bold text-primary mt-12 mb-4 font-playfair">Contact Us</h2>
           <p>
-            If you have questions or comments about this notice, you may email us at hridey@hdclarityspeech.com.
+            If you have questions or comments about this notice, you may email us at hridey@shreefertilityacademy.com.
           </p>
         </div>
       </div>

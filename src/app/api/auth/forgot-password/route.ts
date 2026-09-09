@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { User, PasswordResetToken } from "@/models";
 import crypto from "crypto";
 import { sendPasswordResetEmail } from "@/lib/email";
-
-const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
@@ -13,7 +11,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await User.findOne({
       where: { email },
     });
 
@@ -26,17 +24,15 @@ export async function POST(req: Request) {
     const expires = new Date(Date.now() + 1000 * 60 * 60); // 1 hour from now
 
     // Delete any existing tokens for this email
-    await prisma.passwordResetToken.deleteMany({
+    await PasswordResetToken.destroy({
       where: { email },
     });
 
     // Create new token
-    await prisma.passwordResetToken.create({
-      data: {
-        email,
-        token,
-        expires,
-      },
+    await PasswordResetToken.create({
+      email,
+      token,
+      expires,
     });
 
     // Send email

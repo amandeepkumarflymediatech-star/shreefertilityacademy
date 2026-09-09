@@ -78,35 +78,36 @@ function CouponsContent() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-secondary/20">
         <div>
-          <h1 className="text-3xl font-black text-primary font-playfair mb-2">Discount Coupons</h1>
-          <p className="text-primary/60 text-sm">Manage promotional codes and discounts.</p>
+          <h1 className="text-2xl font-black text-primary font-playfair tracking-tight">Discount Coupons</h1>
+          <p className="text-primary/60 text-sm mt-1">Manage promotional codes and discounts.</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-accent hover:bg-primary text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-lg flex items-center gap-2"
+          className="flex items-center gap-2 bg-accent hover:bg-primary text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all shadow-md hover:shadow-lg"
         >
-          <Plus size={20} />
-          Create Coupon
+          <Plus size={18} /> Create Coupon
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-secondary overflow-hidden">
-        <div className="px-6 py-4 border-b border-secondary bg-secondary/20 flex items-center gap-2">
-          <Tag className="w-5 h-5 text-primary" />
-          <h2 className="font-bold text-primary">All Coupons</h2>
+      <div className="bg-white rounded-2xl shadow-sm border border-secondary/20 overflow-hidden">
+        <div className="px-6 py-5 border-b border-secondary/10 bg-white flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-primary/5 text-primary flex items-center justify-center">
+            <Tag size={18} />
+          </div>
+          <h2 className="font-black text-primary text-lg">All Coupons</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-secondary/10">
-                <th className="px-6 py-4 text-xs font-bold text-primary/50 uppercase tracking-widest border-b border-secondary">Code</th>
-                <th className="px-6 py-4 text-xs font-bold text-primary/50 uppercase tracking-widest border-b border-secondary">Discount</th>
-                <th className="px-6 py-4 text-xs font-bold text-primary/50 uppercase tracking-widest border-b border-secondary">Usage</th>
-                <th className="px-6 py-4 text-xs font-bold text-primary/50 uppercase tracking-widest border-b border-secondary">Status</th>
-                <th className="px-6 py-4 text-xs font-bold text-primary/50 uppercase tracking-widest border-b border-secondary text-right">Actions</th>
+              <tr className="bg-secondary/5 border-b border-secondary/10">
+                <th className="px-6 py-4 text-[10px] font-bold text-primary/50 uppercase tracking-widest">Code</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-primary/50 uppercase tracking-widest">Discount</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-primary/50 uppercase tracking-widest">Usage</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-primary/50 uppercase tracking-widest">Status</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-primary/50 uppercase tracking-widest text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="text-sm">
@@ -120,7 +121,7 @@ function CouponsContent() {
                 </tr>
               ) : (
                 coupons.map((coupon) => (
-                  <tr key={coupon.id} className="border-b border-secondary/50 hover:bg-secondary/10 transition-colors">
+                  <tr key={coupon.id} className="border-b border-secondary/5 hover:bg-secondary/5 transition-colors">
                     <td className="px-6 py-4">
                       <span className="font-mono font-bold text-accent bg-accent/10 px-2 py-1 rounded text-sm">{coupon.code}</span>
                       {coupon.description && <span className="block text-xs font-normal text-primary/50 mt-1">{coupon.description}</span>}

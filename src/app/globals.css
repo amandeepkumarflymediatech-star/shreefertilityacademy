@@ -2,30 +2,28 @@
 
 @theme inline {
   /* Backgrounds */
-  --color-primary-bg: #fafbfd;
-  --color-secondary-bg: #f2f5fa;
+  --color-primary-bg: #fdfcff;
+  --color-secondary-bg: #f4f2f7;
   --color-light-bg: #ffffff;
   
   /* Text and brand colors */
-  --color-primary: #30323d; /* Ink / Main Text */
-  --color-primary-text: #30323d;
-  --color-secondary: #b9b4d8; /* Lavender */
-  --color-secondary-text: #707487; /* Muted Text */
+  --color-primary: #24104F; /* Very Dark Purple */
+  --color-primary-text: #24104F;
+  --color-secondary: #45218C; /* Deep Purple */
+  --color-secondary-text: #706887; /* Muted Text */
   
   /* Accents & Buttons */
-  --color-accent: #5b5aa6; /* Primary CTA Button */
-  --color-accent-dark: #464581; /* Hover State */
-  --color-primary-btn: #5b5aa6;
+  --color-accent: #E63946; /* Vibrant Pink / Magenta */
+  --color-accent-dark: #cc323e; /* Hover State */
+  --color-primary-btn: #45218C;
   
   /* Others */
-  --color-border: #e4e6ef;
+  --color-border: #e4e2ef;
   --color-white: #ffffff;
-  --color-blush: #e7a8c5;
-  --color-blue: #a9cfe3;
   
   /* Typography */
-  --font-playfair: Georgia, serif;
-  --font-cormorant: Georgia, serif;
+  --font-playfair: "Playfair Display", Georgia, serif;
+  --font-cormorant: "Cormorant", Georgia, serif;
   --font-inter: Inter, "Segoe UI", Arial, sans-serif;
   --font-manrope: Inter, "Segoe UI", Arial, sans-serif;
   --font-sans: Inter, "Segoe UI", Arial, sans-serif;
@@ -34,5 +32,5 @@
 body {
   background: var(--color-primary-bg);
   color: var(--color-primary-text);
-  font-family: var(--font-inter);
+  font-family: var(--font-sans);
 }

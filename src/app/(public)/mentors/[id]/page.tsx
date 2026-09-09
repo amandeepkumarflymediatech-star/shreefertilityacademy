@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${mentor.name} - HD Clarity Speech`,
+    title: `${mentor.name} - Shree Fertility Academy`,
     description: mentor.bio || 'Communication and speech expert.',
   };
 }

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import SettingsForm from "./_components/SettingsForm";
 
 export default async function TutorSettingsPage() {
   const session = await getServerSession(authOptions);
@@ -14,8 +15,12 @@ export default async function TutorSettingsPage() {
     where: { id: session.user.id }
   });
 
+  if (!user) {
+    redirect("/login");
+  }
+
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans max-w-4xl">
       
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-b border-secondary/30 pb-6">
         <div>
@@ -24,16 +29,8 @@ export default async function TutorSettingsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
-          <h3 className="text-xl font-black text-primary font-playfair tracking-tight mb-2">Integrations</h3>
-          <p className="text-sm text-primary/60 font-sans">Manage your external connections and tools.</p>
-        </div>
+      <SettingsForm user={user} />
 
-        <div className="lg:col-span-2 lg:col-start-2 bg-white border border-secondary/30 p-8 rounded-3xl shadow-sm space-y-6">
-           <p className="text-sm text-primary/60 font-sans">No integrations available at this time.</p>
-        </div>
-      </div>
     </div>
   );
 }

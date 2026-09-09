@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { SeoMetadata } from "@/models";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -11,9 +11,8 @@ export default async function AdminSeoPage() {
     redirect("/login");
   }
 
-  // @ts-ignore - Bypass IDE cache issue
-  const seoList = await prisma.seoMetadata.findMany({
-    orderBy: { updatedAt: 'desc' }
+  const seoList = await SeoMetadata.findAll({
+    order: [['updatedAt', 'DESC']]
   });
 
   return (

@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!order || order.status === "PAID") {
-      return NextResponse.redirect(new URL(`/invoice/${orderId}`, req.url));
+      return NextResponse.redirect(new URL(`/invoice/${orderId}`, req.url), 303);
     }
 
     // Call PhonePe status API to verify
@@ -76,14 +76,14 @@ export async function POST(req: NextRequest) {
         }
       });
 
-      return NextResponse.redirect(new URL(`/invoice/${orderId}`, req.url));
+      return NextResponse.redirect(new URL(`/invoice/${orderId}`, req.url), 303);
     } else {
       // Payment Failed
       await prisma.order.update({
         where: { id: orderId },
         data: { status: "FAILED" }
       });
-      return NextResponse.redirect(new URL("/student?payment=failed", req.url));
+      return NextResponse.redirect(new URL("/student?payment=failed", req.url), 303);
     }
 
   } catch (error) {
