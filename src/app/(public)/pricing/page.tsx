@@ -129,13 +129,23 @@ export default function PricingPage() {
                       )}
 
                       <div className="mb-8 flex-shrink-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-3">
+                          {pkg.classCount ? (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-bold tracking-wide">
+                              {pkg.classCount} Live Interactive Classes
+                            </span>
+                          ) : null}
+                        </div>
+
                         <h2 className="text-3xl font-bold font-playfair text-primary mb-4">{pkg.title}</h2>
 
-                        {pkg.tagline && (
+                        {(pkg.tagline || pkg.validTill) && (
                           <div className="bg-secondary/5 border border-secondary/10 rounded-xl p-4 mb-6">
-                            <div className="flex items-center gap-2 text-accent font-bold text-xs uppercase tracking-widest mb-2">
-                              <Clock size={16} /> {pkg.tagline}
-                            </div>
+                            {pkg.tagline && (
+                              <div className="flex items-center gap-2 text-accent font-bold text-xs uppercase tracking-widest mb-1">
+                                <Clock size={16} /> {pkg.tagline}
+                              </div>
+                            )}
                             {pkg.validTill && (
                               <span className="text-primary/60 text-xs uppercase tracking-widest font-bold">Valid till: {formatDate(pkg.validTill)}</span>
                             )}

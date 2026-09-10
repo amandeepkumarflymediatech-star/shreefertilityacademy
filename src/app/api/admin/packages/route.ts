@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await req.json();
-    const { title, price, regularPrice, tagline, validTill, features, isActive } = data;
+    const { title, price, regularPrice, classCount, tagline, validTill, features, isActive } = data;
 
     if (!title || price === undefined) {
       return NextResponse.json({ error: "Title and price are required" }, { status: 400 });
@@ -38,7 +38,8 @@ export async function POST(req: NextRequest) {
       title,
       price: parseFloat(price),
       regularPrice: regularPrice ? parseFloat(regularPrice) : null,
-      tagline,
+      classCount: classCount !== undefined && classCount !== "" ? parseInt(classCount, 10) : 12,
+      tagline: tagline || null,
       validTill: validTill ? new Date(validTill) : null,
       features: features ? JSON.stringify(features) : null,
       isActive: isActive !== undefined ? isActive : true

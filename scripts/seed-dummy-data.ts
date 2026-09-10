@@ -220,6 +220,7 @@ async function seed() {
       title: 'Foundational IVF & Embryology Track',
       price: 24999,
       regularPrice: 35000,
+      classCount: 6,
       tagline: 'Ideal for MBBS graduates and junior embryology trainees.',
       features: JSON.stringify([
         'Full access to all recorded fellowship lectures',
@@ -234,6 +235,7 @@ async function seed() {
       title: 'Advanced Clinical Fellowship & 1-on-1 Mentorship',
       price: 49999,
       regularPrice: 75000,
+      classCount: 12,
       tagline: 'Comprehensive clinical mastery with direct mentor consultation.',
       features: JSON.stringify([
         'Everything in Foundational Track',
@@ -249,6 +251,7 @@ async function seed() {
       title: 'Masterclass: Andrology & Surgical Sperm Retrieval',
       price: 18999,
       regularPrice: 28000,
+      classCount: 4,
       tagline: 'Targeted specialization in male factor infertility and Micro-TESE.',
       features: JSON.stringify([
         'Micro-TESE high-definition video dissections',

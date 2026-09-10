@@ -19,12 +19,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Package not found" }, { status: 404 });
     }
 
-    const { title, price, regularPrice, tagline, validTill, features, isActive } = data;
+    const { title, price, regularPrice, classCount, tagline, validTill, features, isActive } = data;
 
     await pkg.update({
       title: title !== undefined ? title : pkg.title,
       price: price !== undefined ? parseFloat(price) : pkg.price,
       regularPrice: regularPrice !== undefined ? (regularPrice ? parseFloat(regularPrice) : null) : pkg.regularPrice,
+      classCount: classCount !== undefined ? (classCount !== "" ? parseInt(classCount, 10) : 12) : pkg.classCount,
       tagline: tagline !== undefined ? tagline : pkg.tagline,
       validTill: validTill !== undefined ? (validTill ? new Date(validTill) : null) : pkg.validTill,
       features: features !== undefined ? (features ? JSON.stringify(features) : null) : pkg.features,

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Sequelize } from 'sequelize';
 
 const globalForSequelize = globalThis as unknown as { sequelize: Sequelize };

@@ -69,20 +69,24 @@ export async function POST(req: NextRequest) {
       let packageClasses = 12; // default
       if (order.membershipId) {
         const pkg = await PricingPackage.findByPk(order.membershipId);
-        if (pkg?.features) {
-          try {
-            const feats = typeof pkg.features === 'string' ? JSON.parse(pkg.features) : pkg.features;
-            if (Array.isArray(feats)) {
-              for (const f of feats) {
-                const m = f.match(/(\d+)\s*(?:Live|Interactive|Classes|Sessions|Masterclasses|Webinars)/i);
-                if (m) {
-                  packageClasses = parseInt(m[1], 10);
-                  break;
+        if (pkg) {
+          if (pkg.classCount && pkg.classCount > 0) {
+            packageClasses = pkg.classCount;
+          } else if (pkg.features) {
+            try {
+              const feats = typeof pkg.features === 'string' ? JSON.parse(pkg.features) : pkg.features;
+              if (Array.isArray(feats)) {
+                for (const f of feats) {
+                  const m = f.match(/(\d+)\s*(?:Live|Interactive|Classes|Sessions|Masterclasses|Webinars)/i);
+                  if (m) {
+                    packageClasses = parseInt(m[1], 10);
+                    break;
+                  }
                 }
               }
+            } catch (e) {
+              console.error("Error parsing package features for class count:", e);
             }
-          } catch (e) {
-            console.error("Error parsing package features for class count:", e);
           }
         }
       }

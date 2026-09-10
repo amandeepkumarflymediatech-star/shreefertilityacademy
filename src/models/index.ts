@@ -622,8 +622,9 @@ export interface PricingPackageAttributes {
   title: string;
   price: number;
   regularPrice?: number;
+  classCount?: number;
   tagline?: string;
-  validTill?: Date;
+  validTill?: Date | null;
   features?: string; // Stored as JSON string
   isActive?: boolean;
   createdAt?: Date;
@@ -637,6 +638,7 @@ export class PricingPackage extends Model<PricingPackageAttributes, PricingPacka
   declare title: any;
   declare price: any;
   declare regularPrice: any;
+  declare classCount: any;
   declare tagline: any;
   declare validTill: any;
   declare features: any;
@@ -1547,11 +1549,16 @@ PricingPackage.init({
   regularPrice: {
     type: DataTypes.FLOAT,
   },
+  classCount: {
+    type: DataTypes.INTEGER,
+    defaultValue: 12,
+  },
   tagline: {
     type: DataTypes.STRING,
   },
   validTill: {
     type: DataTypes.DATE,
+    allowNull: true,
   },
   features: {
     type: DataTypes.TEXT,
