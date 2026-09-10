@@ -5,10 +5,13 @@ import { sendContactUserConfirmation, sendContactAdminNotification } from '@/lib
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, email, studyPreference, message } = body;
+    const name = body.name?.trim();
+    const email = body.email?.trim();
+    const studyPreference = (body.subject || body.studyPreference || "General Inquiry").trim();
+    const message = body.message?.trim();
 
-    if (!name || !email || !studyPreference || !message) {
-      return NextResponse.json({ error: 'All fields are required.' }, { status: 400 });
+    if (!name || !email || !message) {
+      return NextResponse.json({ error: 'Name, email, and message are required.' }, { status: 400 });
     }
 
     const contactMessage = await ContactMessage.create({
@@ -16,8 +19,9 @@ export async function POST(req: Request) {
       email,
       studyPreference,
       message,
-    });
-
+      status: "UNREAD",
+      createdAt: new Date(),
+    } as any);
 
     // Send email notifications (non-blocking)
     Promise.all([

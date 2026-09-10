@@ -2,6 +2,8 @@
 
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { useState } from 'react';
+import { submitContactMessage } from '@/actions/contact-actions';
+import { toast } from 'sonner';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -16,14 +18,22 @@ export default function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      const res = await submitContactMessage(formData);
+      if (res.success) {
+        setIsSubmitted(true);
+        setFormData({ name: '', email: '', subject: '', message: '' });
+        toast.success("Your message has been sent successfully!");
+      } else {
+        toast.error(res.error || "Failed to submit message. Please try again.");
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
       setIsSubmitting(false);
-      setIsSubmitted(true);
-      setFormData({ name: '', email: '', subject: '', message: '' });
-      // Reset success state after a few seconds
-      setTimeout(() => setIsSubmitted(false), 5000);
-    }, 1500);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -38,7 +48,7 @@ export default function Contact() {
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-playfair font-bold mb-6">Get in Touch</h1>
           <p className="text-secondary/90 text-lg md:text-xl font-sans max-w-2xl mx-auto">
-            Have questions about our speech therapy programs? We're here to help. Reach out to our team of experts today.
+            Have questions about our Reproductive Medicine & IVF Fellowship programs? We're here to help. Reach out to our academic team today.
           </p>
         </div>
       </section>
@@ -57,8 +67,8 @@ export default function Contact() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-primary mb-1">Call Us</h3>
-                  <p className="text-primary/70 mb-1 font-medium hover:text-accent cursor-pointer transition-colors">+91 83608-58527</p>
-                  <p className="text-primary/60 text-sm">Mon-Fri, 9am-6pm EST</p>
+                  <a href="tel:+918360858527" className="text-primary/70 mb-1 font-medium hover:text-accent cursor-pointer transition-colors block">+91 83608-58527</a>
+                  <p className="text-primary/60 text-sm">Mon-Sat, 9am-6pm IST</p>
                 </div>
               </div>
 
@@ -68,7 +78,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-primary mb-1">Email Us</h3>
-                  <p className="text-primary/70 mb-1 font-medium hover:text-accent cursor-pointer transition-colors">hridey@shreefertilityacademy.com</p>
+                  <a href="mailto:hridey@shreefertilityacademy.com" className="text-primary/70 mb-1 font-medium hover:text-accent cursor-pointer transition-colors block">hridey@shreefertilityacademy.com</a>
                   <p className="text-primary/60 text-sm">We reply within 24 hours</p>
                 </div>
               </div>
@@ -79,21 +89,21 @@ export default function Contact() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-primary mb-1">Visit Us</h3>
-                  <p className="text-primary/70 mb-1 font-medium hover:text-accent cursor-pointer transition-colors">123 Therapy Lane, Suite 100</p>
-                  <p className="text-primary/60 text-sm">New York, NY 10001</p>
+                  <p className="text-primary/70 mb-1 font-medium">Shree Fertility & Surgical Center</p>
+                  <p className="text-primary/60 text-sm">India</p>
                 </div>
               </div>
             </div>
 
-            {/* Decorative block / Map Placeholder */}
+            {/* Decorative block */}
             <div className="bg-secondary/10 w-full h-64 rounded-3xl border border-secondary/30 flex items-center justify-center overflow-hidden relative group">
-              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')] bg-cover bg-center opacity-30 mix-blend-overlay group-hover:scale-105 transition-transform duration-700"></div>
+              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')] bg-cover bg-center opacity-40 mix-blend-overlay group-hover:scale-105 transition-transform duration-700"></div>
               <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
               <div className="z-10 flex flex-col items-center mt-20">
                 <div className="bg-white p-3 rounded-full mb-3 shadow-lg shadow-black/20 animate-bounce">
                   <MapPin className="w-6 h-6 text-accent" />
                 </div>
-                <p className="text-white font-bold text-lg tracking-wide">Our Location</p>
+                <p className="text-white font-bold text-lg tracking-wide">Shree Fertility Academy</p>
               </div>
             </div>
           </div>
@@ -101,7 +111,7 @@ export default function Contact() {
           {/* Contact Form */}
           <div className="bg-white rounded-[2rem] p-8 md:p-10 shadow-2xl shadow-primary/10 border border-secondary/20">
             <h2 className="text-3xl font-playfair font-bold text-primary mb-2">Send a Message</h2>
-            <p className="text-primary/60 mb-8 font-sans">Fill out the form below and we'll get back to you as soon as possible.</p>
+            <p className="text-primary/60 mb-8 font-sans">Fill out the form below and our admissions team will get back to you as soon as possible.</p>
 
             {isSubmitted ? (
               <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
@@ -109,15 +119,21 @@ export default function Contact() {
                   <Send className="w-10 h-10 ml-2" />
                 </div>
                 <h3 className="text-2xl font-bold text-primary mb-3 font-playfair">Message Sent!</h3>
-                <p className="text-primary/70">
+                <p className="text-primary/70 mb-6 max-w-sm">
                   Thank you for reaching out. We've received your message and will get back to you shortly.
                 </p>
+                <button
+                  onClick={() => setIsSubmitted(false)}
+                  className="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 transition shadow-sm"
+                >
+                  Send Another Message
+                </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label htmlFor="name" className="text-sm font-bold text-primary ml-1">Full Name</label>
+                    <label htmlFor="name" className="text-sm font-bold text-primary ml-1">Full Name *</label>
                     <input
                       type="text"
                       id="name"
@@ -125,12 +141,12 @@ export default function Contact() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-5 py-3.5 rounded-2xl border border-secondary/40 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all bg-gray-50/50 hover:bg-white"
-                      placeholder="John Doe"
+                      className="w-full px-5 py-3.5 rounded-2xl border border-secondary/40 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all bg-gray-50/50 hover:bg-white text-primary"
+                      placeholder="Dr. John Doe"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-bold text-primary ml-1">Email Address</label>
+                    <label htmlFor="email" className="text-sm font-bold text-primary ml-1">Email Address *</label>
                     <input
                       type="email"
                       id="email"
@@ -138,28 +154,27 @@ export default function Contact() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-5 py-3.5 rounded-2xl border border-secondary/40 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all bg-gray-50/50 hover:bg-white"
-                      placeholder="john@example.com"
+                      className="w-full px-5 py-3.5 rounded-2xl border border-secondary/40 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all bg-gray-50/50 hover:bg-white text-primary"
+                      placeholder="doctor@example.com"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="subject" className="text-sm font-bold text-primary ml-1">Subject</label>
+                  <label htmlFor="subject" className="text-sm font-bold text-primary ml-1">Subject / Area of Interest</label>
                   <input
                     type="text"
                     id="subject"
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    required
-                    className="w-full px-5 py-3.5 rounded-2xl border border-secondary/40 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all bg-gray-50/50 hover:bg-white"
-                    placeholder="How can we help you?"
+                    className="w-full px-5 py-3.5 rounded-2xl border border-secondary/40 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all bg-gray-50/50 hover:bg-white text-primary"
+                    placeholder="e.g. Reproductive Medicine Fellowship Inquiry"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="message" className="text-sm font-bold text-primary ml-1">Message</label>
+                  <label htmlFor="message" className="text-sm font-bold text-primary ml-1">Message *</label>
                   <textarea
                     id="message"
                     name="message"
@@ -167,8 +182,8 @@ export default function Contact() {
                     onChange={handleChange}
                     required
                     rows={5}
-                    className="w-full px-5 py-3.5 rounded-2xl border border-secondary/40 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all bg-gray-50/50 hover:bg-white resize-none"
-                    placeholder="Tell us about your needs..."
+                    className="w-full px-5 py-3.5 rounded-2xl border border-secondary/40 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all bg-gray-50/50 hover:bg-white resize-none text-primary"
+                    placeholder="Tell us about your background or requirements..."
                   ></textarea>
                 </div>
 

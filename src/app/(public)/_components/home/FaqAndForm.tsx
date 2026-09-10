@@ -4,7 +4,9 @@ import React, { useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Send, CheckCircle2 } from 'lucide-react';
+import { submitContactMessage } from '@/actions/contact-actions';
+import { toast } from 'sonner';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -18,6 +20,15 @@ const faqs = [
 export default function FaqAndForm() {
   const container = useRef<HTMLDivElement>(null);
   const [openIdx, setOpenIdx] = useState<number | null>(0);
+
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   useGSAP(() => {
     gsap.fromTo('.faq-header',
@@ -46,6 +57,41 @@ export default function FaqAndForm() {
     );
   }, { scope: container });
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+    const message = `Phone: ${formData.phone || 'Not provided'} | Inquiry from Homepage Request Info form.`;
+
+    try {
+      const res = await submitContactMessage({
+        name: fullName || 'Prospective Fellow',
+        email: formData.email,
+        studyPreference: 'Homepage Inquiry / Request Info',
+        message: message,
+      });
+
+      if (res.success) {
+        setIsSubmitted(true);
+        setFormData({ firstName: '', lastName: '', email: '', phone: '' });
+        toast.success("Thank you! Your information request has been submitted.");
+      } else {
+        toast.error(res.error || "Failed to submit form. Please try again.");
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   return (
     <section ref={container} className="relative w-full py-32 bg-primary-bg overflow-hidden">
       
@@ -70,33 +116,94 @@ export default function FaqAndForm() {
                 <h3 className="text-2xl font-bold font-playfair mb-2">Find details about your next step.</h3>
                 <p className="text-white/70 font-sans text-sm mb-8">Fill the form below and our team will get back to you.</p>
 
-                <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                     <div>
-                       <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-1.5">First Name *</label>
-                       <input type="text" className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-accent transition-colors" placeholder="John" />
-                     </div>
-                     <div>
-                       <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-1.5">Last Name *</label>
-                       <input type="text" className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-accent transition-colors" placeholder="Doe" />
-                     </div>
+                {isSubmitted ? (
+                  <div className="py-12 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
+                    <div className="w-16 h-16 bg-accent/20 border border-accent/40 rounded-full flex items-center justify-center text-accent mb-4">
+                      <CheckCircle2 className="w-8 h-8" />
+                    </div>
+                    <h4 className="text-xl font-bold font-playfair mb-2">Request Received!</h4>
+                    <p className="text-white/80 text-sm mb-6 max-w-xs">
+                      Thank you for your interest. Our academic coordinator will contact you shortly with the fellowship details.
+                    </p>
+                    <button
+                      onClick={() => setIsSubmitted(false)}
+                      className="px-6 py-2.5 bg-white text-primary rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-accent hover:text-white transition"
+                    >
+                      Submit Another Request
+                    </button>
                   </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                     <div>
-                       <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-1.5">Email *</label>
-                       <input type="email" className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-accent transition-colors" placeholder="john@example.com" />
-                     </div>
-                     <div>
-                       <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-1.5">Phone Number *</label>
-                       <input type="tel" className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-accent transition-colors" placeholder="+91 9876543210" />
-                     </div>
-                  </div>
-                  
-                  <button type="submit" className="w-full bg-white text-primary hover:bg-accent hover:text-white font-bold uppercase tracking-widest text-sm py-4 rounded-xl mt-6 transition-colors shadow-lg">
-                    Request Info
-                  </button>
-                </form>
+                ) : (
+                  <form className="space-y-4" onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                       <div>
+                         <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-1.5">First Name *</label>
+                         <input 
+                           type="text" 
+                           name="firstName"
+                           value={formData.firstName}
+                           onChange={handleChange}
+                           required
+                           className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-accent transition-colors" 
+                           placeholder="John" 
+                         />
+                       </div>
+                       <div>
+                         <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-1.5">Last Name *</label>
+                         <input 
+                           type="text" 
+                           name="lastName"
+                           value={formData.lastName}
+                           onChange={handleChange}
+                           required
+                           className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-accent transition-colors" 
+                           placeholder="Doe" 
+                         />
+                       </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                       <div>
+                         <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-1.5">Email *</label>
+                         <input 
+                           type="email" 
+                           name="email"
+                           value={formData.email}
+                           onChange={handleChange}
+                           required
+                           className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-accent transition-colors" 
+                           placeholder="doctor@example.com" 
+                         />
+                       </div>
+                       <div>
+                         <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-1.5">Phone Number *</label>
+                         <input 
+                           type="tel" 
+                           name="phone"
+                           value={formData.phone}
+                           onChange={handleChange}
+                           required
+                           className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-accent transition-colors" 
+                           placeholder="+91 9876543210" 
+                         />
+                       </div>
+                    </div>
+                    
+                    <button 
+                      type="submit" 
+                      disabled={isSubmitting}
+                      className="w-full bg-white text-primary hover:bg-accent hover:text-white font-bold uppercase tracking-widest text-sm py-4 rounded-xl mt-6 transition-colors shadow-lg flex items-center justify-center gap-2 disabled:opacity-60"
+                    >
+                      {isSubmitting ? (
+                        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          Request Info
+                          <Send size={16} />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
              </div>
           </div>
 
