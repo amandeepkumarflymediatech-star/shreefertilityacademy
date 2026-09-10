@@ -143,7 +143,7 @@ export default function PricingPage() {
                         )}
 
                         <div className="flex items-end gap-2 mb-2">
-                          <span className="text-5xl font-black font-playfair tracking-tight text-primary">₹{(pkg.price / 1000).toFixed(0)}k</span>
+                          <span className="text-5xl font-black font-playfair tracking-tight text-primary">₹{pkg.price.toLocaleString('en-IN')}</span>
                           <span className="text-sm text-primary/60 font-bold mb-2">+ GST</span>
                         </div>
                         {pkg.regularPrice && (
