@@ -617,6 +617,34 @@ export class LessonProgress extends Model<LessonProgressAttributes, LessonProgre
   declare updatedAt: any;
 }
 
+export interface PricingPackageAttributes {
+  id?: string;
+  title: string;
+  price: number;
+  regularPrice?: number;
+  tagline?: string;
+  validTill?: Date;
+  features?: string; // Stored as JSON string
+  isActive?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface PricingPackageCreationAttributes extends Optional<PricingPackageAttributes, 'id'> {}
+
+export class PricingPackage extends Model<PricingPackageAttributes, PricingPackageCreationAttributes> implements PricingPackageAttributes {
+  declare id: any;
+  declare title: any;
+  declare price: any;
+  declare regularPrice: any;
+  declare tagline: any;
+  declare validTill: any;
+  declare features: any;
+  declare isActive: any;
+  declare createdAt: any;
+  declare updatedAt: any;
+}
+
 User.init({
   id: {
     type: DataTypes.STRING,
@@ -1502,6 +1530,49 @@ LessonProgress.init({
   modelName: 'LessonProgress',
 });
 
+PricingPackage.init({
+  id: {
+    type: DataTypes.STRING,
+    primaryKey: true,
+    defaultValue: DataTypes.UUIDV4,
+  },
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  price: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+  regularPrice: {
+    type: DataTypes.FLOAT,
+  },
+  tagline: {
+    type: DataTypes.STRING,
+  },
+  validTill: {
+    type: DataTypes.DATE,
+  },
+  features: {
+    type: DataTypes.TEXT,
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+}, {
+  sequelize,
+  modelName: 'PricingPackage',
+});
+
+
 // Associations
 ClassEnrollment.belongsTo(User, { as: 'student', foreignKey: 'studentId' });
 User.hasMany(ClassEnrollment, { as: 'enrollments', foreignKey: 'studentId' });
@@ -1515,5 +1586,5 @@ User.hasMany(LiveClass, { as: 'taughtClasses', foreignKey: 'tutorId' });
 Order.belongsTo(User, { as: 'student', foreignKey: 'studentId' });
 User.hasMany(Order, { as: 'orders', foreignKey: 'studentId' });
 
-Order.belongsTo(Membership, { as: 'membership', foreignKey: 'membershipId' });
-Membership.hasMany(Order, { as: 'orders', foreignKey: 'membershipId' });
+Order.belongsTo(PricingPackage, { as: 'package', foreignKey: 'membershipId' });
+PricingPackage.hasMany(Order, { as: 'orders', foreignKey: 'membershipId' });

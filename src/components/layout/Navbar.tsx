@@ -59,24 +59,30 @@ export default function Navbar() {
 
           {/* Middle: Links */}
           <div className="hidden md:flex items-center gap-8 font-bold text-xs uppercase tracking-widest font-sans">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`transition flex items-center gap-1 ${isActive(link.href) ? 'text-accent' : 'text-primary hover:text-accent'}`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {links.map((link) => {
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`transition flex items-center gap-1 ${
+                    isActive(link.href) 
+                      ? 'text-accent' 
+                      : 'text-primary hover:text-accent'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
 
-          {/* Right Side: Actions */}
+            {/* Right Side: Actions */}
           <div className="flex items-center gap-5 font-sans">
             {session ? (
               <div className="relative hidden md:block" ref={dropdownRef}>
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-3 px-3 py-1.5 bg-secondary/5 text-primary hover:bg-secondary/10 transition rounded-full font-bold text-sm border border-secondary/20"
+                  className={`flex items-center gap-3 px-3 py-1.5 transition rounded-full font-bold text-sm border bg-secondary/5 text-primary hover:bg-secondary/10 border-secondary/20`}
                 >
                   <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-playfair font-black text-sm relative overflow-hidden">
                     {session.user.image ? (
@@ -117,7 +123,7 @@ export default function Navbar() {
               <>
                 <Link
                   href="/login"
-                  className="hidden md:block px-6 py-3 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-full shadow-sm hover:bg-secondary transition-colors duration-300"
+                  className={`hidden md:block px-6 py-3 font-bold text-xs uppercase tracking-widest rounded-full shadow-sm transition-colors duration-300 bg-primary text-white hover:bg-secondary`}
                 >
                   Login
                 </Link>

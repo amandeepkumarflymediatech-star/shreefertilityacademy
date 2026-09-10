@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { Order, Membership, Payment } from "@/models";
 import { 
-  PHONEPE_MERCHANT_ID, 
-  PHONEPE_BASE_URL, 
-  generateChecksum 
+  PHONEPE_MERCHANT_ID,
+  PHONEPE_SALT_KEY,
+  PHONEPE_SALT_INDEX,
+  PHONEPE_ENV
 } from "@/lib/phonepe";
+import { StandardCheckoutClient, Env } from "@phonepe-pg/pg-sdk-node";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,71 +20,54 @@ export async function POST(req: NextRequest) {
       return NextResponse.redirect(new URL("/student?payment=failed", req.url));
     }
 
-    const order = await prisma.order.findUnique({
-      where: { id: orderId }
-    });
+    const order = await Order.findByPk(orderId);
 
     if (!order || order.status === "PAID") {
       return NextResponse.redirect(new URL(`/invoice/${orderId}`, req.url), 303);
     }
 
-    // Call PhonePe status API to verify
-    const endpoint = `/pg/v1/status/${PHONEPE_MERCHANT_ID}/${transactionId}`;
-    // For GET status API, payload string is empty
-    const checksum = generateChecksum("", endpoint);
+    // Call PhonePe status API using SDK
+    const env = (PHONEPE_ENV === 'PROD' || PHONEPE_ENV === 'production') ? Env.PRODUCTION : Env.SANDBOX;
+    const client = StandardCheckoutClient.getInstance(
+        PHONEPE_MERCHANT_ID,
+        PHONEPE_SALT_KEY,
+        parseInt(PHONEPE_SALT_INDEX || '1'),
+        env
+    );
 
-    const verifyRes = await fetch(`${PHONEPE_BASE_URL}${endpoint}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "X-VERIFY": checksum,
-        "X-MERCHANT-ID": PHONEPE_MERCHANT_ID
-      }
-    });
+    const verifyData = await client.getOrderStatus(transactionId);
 
-    const verifyData = await verifyRes.json();
-
-    if (verifyData.success && verifyData.code === "PAYMENT_SUCCESS") {
+    if (verifyData && (verifyData.state === "COMPLETED" || verifyData.state === "SUCCESS")) {
       // Create Membership for 1 Year with 12 Classes
-      const membership = await prisma.membership.create({
-        data: {
-          studentId: order.studentId,
-          maxClasses: 12,
-          usedClasses: 0,
-          validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year validity
-          status: "ACTIVE"
-        }
-      });
+      const membership = await Membership.create({
+        studentId: order.studentId,
+        maxClasses: 12,
+        usedClasses: 0,
+        validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year validity
+        status: "ACTIVE"
+      } as any);
 
       // Update Order to PAID
-      await prisma.order.update({
-        where: { id: orderId },
-        data: {
-          status: "PAID",
-          membershipId: membership.id
-        }
+      await order.update({
+        status: "PAID",
+        membershipId: membership.id
       });
 
       // Create Payment record
-      await prisma.payment.create({
-        data: {
-          orderId: orderId,
-          studentId: order.studentId,
-          amount: verifyData.data.amount / 100, // convert paise back to rupees
-          currency: "INR",
-          status: "SUCCESS",
-          merchantTransactionId: `MT${order.id.replace(/-/g, '').substring(0, 30)}`,
-          phonepeTransactionId: transactionId,
-        }
-      });
+      await Payment.create({
+        orderId: orderId,
+        studentId: order.studentId,
+        amount: verifyData.amount ? verifyData.amount / 100 : order.amount,
+        currency: "INR",
+        status: "SUCCESS",
+        merchantTransactionId: transactionId,
+        phonepeTransactionId: verifyData.orderId || transactionId,
+      } as any);
 
       return NextResponse.redirect(new URL(`/invoice/${orderId}`, req.url), 303);
     } else {
       // Payment Failed
-      await prisma.order.update({
-        where: { id: orderId },
-        data: { status: "FAILED" }
-      });
+      await order.update({ status: "FAILED" });
       return NextResponse.redirect(new URL("/student?payment=failed", req.url), 303);
     }
 

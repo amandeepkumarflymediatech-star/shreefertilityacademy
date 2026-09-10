@@ -44,7 +44,7 @@ export default async function StudentCoursesPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {courses.length > 0 ? courses.map((course) => (
+        {courses.length > 0 ? courses.map((course: any) => (
           <div key={course.id} className="bg-white rounded-[2rem] border border-secondary/20 shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col">
             <div className="aspect-video bg-secondary/10 relative overflow-hidden flex items-center justify-center">
               {course.coverImage ? (

@@ -48,7 +48,7 @@ export default async function AdminCoursesPage() {
               </tr>
             </thead>
             <tbody>
-              {courses.length > 0 ? courses.map((course) => (
+              {courses.length > 0 ? courses.map((course: any) => (
                 <tr key={course.id} className="border-b border-secondary/5 hover:bg-secondary/5 transition-colors">
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">

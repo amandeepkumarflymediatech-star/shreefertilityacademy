@@ -24,7 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Tutor Applications', href: '/admin/tutors', icon: GraduationCap },
     { name: 'Courses (LMS)', href: '/admin/courses', icon: BookOpen },
     { name: 'Enrollments', href: '/admin/enrollments', icon: Users },
-    { name: 'Pricing Tiers', href: '/admin/pricing', icon: CreditCard },
+    { name: 'Pricing Packages', href: '/admin/packages', icon: CreditCard },
     { name: 'Payments', href: '/admin/payments', icon: Banknote },
     { name: 'Coupons', href: '/admin/coupons', icon: Tag },
     { name: 'Contacts', href: '/admin/contacts', icon: MessageSquare },
@@ -105,11 +105,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
           
           <div className="flex items-center gap-5">
-            <button className="relative p-2 text-primary/60 hover:text-accent transition-colors">
-              <Bell size={22} />
-              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-white"></span>
-            </button>
-            <div className="h-8 w-px bg-secondary/50"></div>
+
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white font-bold font-playfair text-xl shadow-md">
                 A

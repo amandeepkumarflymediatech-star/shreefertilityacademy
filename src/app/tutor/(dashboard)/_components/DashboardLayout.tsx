@@ -38,6 +38,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
         <div className="p-6 flex items-center justify-between border-b border-secondary/20">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <Image src="/logo.png" alt="Shree Fertility Academy Logo" width={150} height={40} className="object-contain w-auto h-10" priority />
+            <span className="text-xs font-black text-primary uppercase tracking-widest border-l-2 border-primary/30 pl-3">TUTOR PORTAL</span>
           </Link>
           <button className="md:hidden text-primary/60 hover:text-primary transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
             <X size={24} />
@@ -45,7 +46,6 @@ export default function DashboardLayout({ children, user }: { children: React.Re
         </div>
         
         <div className="px-6 py-8 flex-1 overflow-y-auto">
-          <p className="text-xs font-bold text-primary/40 uppercase tracking-widest mb-6">Overview</p>
           <nav className="space-y-2">
             {navItems.map((item) => {
               const isActive = item.href === '/tutor' 
@@ -94,15 +94,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
           </div>
           
           <div className="flex items-center gap-6">
-            <button className="relative p-2 text-primary/60 hover:text-primary transition-colors hover:bg-secondary/30 rounded-full">
-              <Bell size={22} />
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-accent rounded-full border-2 border-white animate-pulse"></span>
-            </button>
-            <div className="h-10 w-px bg-secondary/50 hidden sm:block"></div>
+
             <div className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity">
               <div className="w-11 h-11 bg-primary flex items-center justify-center text-white font-black font-playfair text-xl rounded-2xl shadow-sm shadow-primary/20 relative overflow-hidden">
                 {user?.image ? (
-                  <Image src={user.image} alt="Profile" fill className="object-cover" />
+                  <Image src={user.image} alt="Profile" fill sizes="44px" className="object-cover" />
                 ) : (
                   displayName.charAt(0).toUpperCase()
                 )}

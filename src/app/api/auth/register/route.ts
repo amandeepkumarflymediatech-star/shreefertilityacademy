@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       email,
       password: hashedPassword,
       role: role === 'TUTOR' ? 'TUTOR' : 'STUDENT',
-    });
+    } as any);
 
     if (user.role === "STUDENT") {
       sendAdminNewStudentAlert(user.email, user.name || "Unknown").catch(err => console.error("Failed to send student alert", err));

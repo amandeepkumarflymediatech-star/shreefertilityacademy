@@ -48,7 +48,7 @@ export default async function StudentPurchasesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paidOrders.map((order) => (
+                  {paidOrders.map((order: any) => (
                     <tr key={order.id} className="border-b border-secondary/5 hover:bg-secondary/5 transition-colors">
                       <td className="py-4 px-4">
                         <span className="text-sm font-bold text-primary bg-secondary/10 px-2 py-1 rounded-md">

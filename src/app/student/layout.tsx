@@ -37,6 +37,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
         <div className="p-8 flex items-center justify-between border-b border-secondary/30">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <Image src="/logo.png" alt="Shree Fertility Academy Logo" width={150} height={40} className="object-contain w-auto h-10" priority />
+            <span className="text-xs font-black text-primary uppercase tracking-widest border-l-2 border-primary/30 pl-3">STUDENT PORTAL</span>
           </Link>
           <button className="md:hidden text-primary/50 hover:text-primary transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
             <X size={24} />
@@ -44,7 +45,6 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
         </div>
         
         <div className="px-6 py-8 flex-1 overflow-y-auto">
-          <p className="text-[10px] font-bold text-primary/40 uppercase tracking-widest mb-6 ml-4">Overview</p>
           <nav className="space-y-2">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
@@ -107,11 +107,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           </div>
           
           <div className="flex items-center gap-6">
-            <button className="relative p-3 bg-white border border-secondary/30 rounded-xl text-primary/60 hover:text-primary hover:shadow-md transition-all">
-              <Bell size={20} />
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-accent rounded-full shadow-[0_0_5px_rgba(var(--accent),0.5)]"></span>
-            </button>
-            <div className="h-8 w-px bg-secondary/30 hidden sm:block"></div>
+
             <div className="flex items-center gap-4 cursor-pointer group">
               <div className="hidden sm:block text-right transition-transform group-hover:-translate-x-1">
                 <div className="text-sm font-bold text-primary leading-tight">{session?.user?.name || 'Student'}</div>
@@ -119,7 +115,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
               </div>
               <div className="w-12 h-12 bg-primary flex items-center justify-center text-white font-black font-playfair text-xl rounded-2xl shadow-lg border border-primary/20 group-hover:scale-105 transition-transform uppercase relative overflow-hidden">
                 {session?.user?.image ? (
-                  <Image src={session.user.image} alt="Profile" fill className="object-cover" />
+                  <Image src={session.user.image} alt="Profile" fill sizes="44px" className="object-cover" />
                 ) : (
                   session?.user?.name ? session.user.name.charAt(0) : 'S'
                 )}

@@ -1,4 +1,5 @@
-import { prisma } from "@/lib/db";
+import { User } from "@/models";
+import { Op } from "sequelize";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -11,14 +12,16 @@ export default async function AdminUsersPage() {
     redirect("/login");
   }
 
-  const users = await prisma.user.findMany({
+  const userInstances = await User.findAll({
     where: {
       id: {
-        not: session.user.id
+        [Op.ne]: session.user.id
       }
     },
-    orderBy: { createdAt: 'desc' }
+    order: [['createdAt', 'DESC']]
   });
+  
+  const users = userInstances.map(u => u.get({ plain: true }));
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans">
