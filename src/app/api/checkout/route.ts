@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
     // 2. Initiate PhonePe V2 Checkout Session
     const paymentResponse = await createPhonePePayment({
       merchantOrderId: merchantOrderId,
+      merchantUserId: session.user.id,
       amountInPaise: Math.round(amount * 100),
       redirectUrl: `${appUrl}/api/phonepe/callback?orderId=${order.id}`,
       callbackUrl: `${appUrl}/api/phonepe/webhook`,

@@ -91,10 +91,12 @@ export async function createPhonePePayment(options: {
   redirectUrl: string;
   callbackUrl?: string;
   message?: string;
+  merchantUserId?: string;
+  mobileNumber?: string;
 }) {
   const token = await getPhonePeAccessToken();
 
-  const payload = {
+  const payload: Record<string, any> = {
     merchantOrderId: options.merchantOrderId,
     amount: options.amountInPaise,
     paymentFlow: {
@@ -106,6 +108,13 @@ export async function createPhonePePayment(options: {
       },
     },
   };
+
+  if (options.merchantUserId) {
+    payload.merchantUserId = options.merchantUserId;
+  }
+  if (options.mobileNumber) {
+    payload.mobileNumber = options.mobileNumber;
+  }
 
   const res = await fetch(PHONEPE_CHECKOUT_URL, {
     method: 'POST',
