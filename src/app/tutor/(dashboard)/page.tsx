@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { LiveClass, ClassEnrollment } from "@/models";
 import { Op } from "sequelize";
 import { redirect } from "next/navigation";
+import { formatClassTime } from "@/lib/date-utils";
 
 export default async function TutorDashboard() {
   const session = await getServerSession(authOptions);
@@ -67,12 +68,11 @@ export default async function TutorDashboard() {
   });
 
   const upcomingClasses = upcomingClassesDb.map(c => {
-    const formatTime = (d: Date) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     return {
       id: c.id,
       title: c.title,
       studentCount: (c as any).enrollments ? (c as any).enrollments.length : 0,
-      time: `${formatTime(c.scheduledAt)}`,
+      time: formatClassTime(c.scheduledAt),
       meetingUrl: c.meetingUrl
     }
   });

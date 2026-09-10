@@ -5,6 +5,7 @@ import { Op } from "sequelize";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { formatClassDateTime, formatClassDate } from "@/lib/date-utils";
 
 export default async function StudentDashboard() {
   const session = await getServerSession(authOptions);
@@ -69,7 +70,7 @@ export default async function StudentDashboard() {
     id: e.session.id,
     tutor: e.session.tutor?.name || 'Mentor',
     title: e.session.title,
-    time: new Date(e.session.scheduledAt).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
+    time: formatClassDateTime(e.session.scheduledAt),
     initial: e.session.tutor?.name ? e.session.tutor.name[0].toUpperCase() : 'M',
     url: e.session.meetingUrl || '/student/classes'
   }));
@@ -78,7 +79,7 @@ export default async function StudentDashboard() {
     id: e.session.id,
     tutor: e.session.tutor?.name || 'Mentor',
     title: e.session.title,
-    time: new Date(e.session.scheduledAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    time: formatClassDate(e.session.scheduledAt),
     initial: e.session.tutor?.name ? e.session.tutor.name[0].toUpperCase() : 'M'
   }));
 

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { GraduationCap, CheckCircle2, Video, Calendar, Clock, ExternalLink } from 'lucide-react';
 import { Op } from 'sequelize';
+import { formatClassDate, formatClassTime } from '@/lib/date-utils';
 
 export const metadata = {
   title: 'Faculty & Tutors | Shree Fertility Academy',
@@ -114,15 +115,7 @@ export default async function AllTutorsPage() {
                           <p className="font-bold text-primary truncate">{session.title}</p>
                           <div className="flex items-center justify-between text-[11px] text-primary/60">
                             <span>
-                              {new Date(session.scheduledAt).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                              })}{' '}
-                              •{' '}
-                              {new Date(session.scheduledAt).toLocaleTimeString('en-US', {
-                                hour: 'numeric',
-                                minute: '2-digit',
-                              })}
+                              {formatClassDate(session.scheduledAt)} • {formatClassTime(session.scheduledAt)}
                             </span>
                             {session.meetingUrl && (
                               <a

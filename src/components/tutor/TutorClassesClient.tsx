@@ -34,6 +34,14 @@ import {
 import { createLiveClass, updateLiveClass, deleteLiveClass } from "@/actions/class-actions";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
+import { formatClassTime, formatClassDate, formatClassDateFull, formatClassDateTime } from "@/lib/date-utils";
+
+export type StudentMembershipItem = {
+  id: string;
+  maxClasses: number;
+  usedClasses: number;
+  status: string;
+};
 
 export type StudentUser = {
   id: string;
@@ -41,6 +49,7 @@ export type StudentUser = {
   email?: string | null;
   image?: string | null;
   phone?: string | null;
+  memberships?: StudentMembershipItem[];
 };
 
 export type EnrollmentItem = {
@@ -211,6 +220,12 @@ export default function TutorClassesClient({ classes }: { classes: LiveClassItem
     }
 
     const formData = new FormData(e.currentTarget);
+    if (selectedFormDate) {
+      const parsed = new Date(selectedFormDate);
+      if (!isNaN(parsed.getTime())) {
+        formData.set("scheduledAt", parsed.toISOString());
+      }
+    }
 
     startTransition(async () => {
       try {
@@ -539,11 +554,7 @@ export default function TutorClassesClient({ classes }: { classes: LiveClassItem
                         <div className="flex items-center justify-between mt-1 text-[10px] text-emerald-700 font-semibold">
                           <span className="flex items-center gap-1">
                             <Clock size={10} />
-                            {new Date(bookedClass.scheduledAt).toLocaleTimeString("en-US", {
-                              hour: "numeric",
-                              minute: "2-digit",
-                              hour12: true,
-                            })}
+                            {formatClassTime(bookedClass.scheduledAt)}
                           </span>
                           <span className="text-[9px] bg-emerald-200/80 px-1 py-0.5 rounded font-bold">
                             View Roster
@@ -695,21 +706,13 @@ export default function TutorClassesClient({ classes }: { classes: LiveClassItem
                       <div className="flex items-center gap-2">
                         <CalendarIcon size={14} className="text-accent shrink-0" />
                         <span>
-                          {classDate.toLocaleDateString("en-US", {
-                            weekday: "short",
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                          {formatClassDate(cls.scheduledAt, true)}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock size={14} className="text-accent shrink-0" />
                         <span>
-                          {classDate.toLocaleTimeString("en-US", {
-                            hour: "numeric",
-                            minute: "2-digit",
-                          })}
+                          {formatClassTime(cls.scheduledAt)}
                         </span>
                       </div>
                       
@@ -788,18 +791,9 @@ export default function TutorClassesClient({ classes }: { classes: LiveClassItem
                   </span>
                   <span className="text-xs text-primary/60 font-semibold flex items-center gap-1">
                     <CalendarIcon size={12} />
-                    {new Date(selectedClassForDetails.scheduledAt).toLocaleDateString("en-US", {
-                      weekday: "short",
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
+                    {formatClassDate(selectedClassForDetails.scheduledAt, true)}
                     {" • "}
-                    {new Date(selectedClassForDetails.scheduledAt).toLocaleTimeString("en-US", {
-                      hour: "numeric",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
+                    {formatClassTime(selectedClassForDetails.scheduledAt)}
                   </span>
                 </div>
                 <h2 className="text-2xl font-black text-primary font-playfair tracking-tight">
@@ -965,17 +959,36 @@ export default function TutorClassesClient({ classes }: { classes: LiveClassItem
                             </div>
                           </div>
 
-                          <div className="text-right shrink-0">
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                              <CheckCircle2 size={10} />
-                              Enrolled
-                            </span>
-                            {enrolledDate && (
-                              <p className="text-[10px] text-primary/40 mt-1">
-                                {enrolledDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                              </p>
-                            )}
-                          </div>
+                          {(() => {
+                            const totalCreds = student?.memberships?.reduce((sum, m) => sum + (m.maxClasses || 0), 0) || 0;
+                            const usedCreds = student?.memberships?.reduce((sum, m) => sum + (m.usedClasses || 0), 0) || 0;
+                            const pendingCreds = Math.max(0, totalCreds - usedCreds);
+
+                            return (
+                              <div className="text-right shrink-0 space-y-1">
+                                <div className="flex items-center gap-1.5 justify-end">
+                                  {totalCreds > 0 && (
+                                    <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                                      pendingCreds > 0
+                                        ? "bg-emerald-50 border-emerald-200 text-emerald-800 font-bold"
+                                        : "bg-secondary/20 border-secondary/30 text-primary/60"
+                                    }`}>
+                                      {pendingCreds} Credits Left
+                                    </span>
+                                  )}
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                                    <CheckCircle2 size={10} />
+                                    Enrolled
+                                  </span>
+                                </div>
+                                {enrolledDate && (
+                                  <p className="text-[10px] text-primary/40">
+                                    {formatClassDate(enrolledDate)}
+                                  </p>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </div>
                       );
                     })}
@@ -1218,20 +1231,11 @@ export default function TutorClassesClient({ classes }: { classes: LiveClassItem
                       <p className="text-[11px] text-red-700 leading-relaxed">
                         You already have a class scheduled on{" "}
                         <span className="font-bold">
-                          {new Date(modalDateConflict.scheduledAt).toLocaleDateString("en-US", {
-                            weekday: "long",
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                          {formatClassDateFull(modalDateConflict.scheduledAt)}
                         </span>{" "}
                         at{" "}
                         <span className="font-bold">
-                          {new Date(modalDateConflict.scheduledAt).toLocaleTimeString("en-US", {
-                            hour: "numeric",
-                            minute: "2-digit",
-                            hour12: true,
-                          })}
+                          {formatClassTime(modalDateConflict.scheduledAt)}
                         </span>
                         . Only 1 live class is permitted per calendar day. Please select a different date from the calendar.
                       </p>
@@ -1280,8 +1284,7 @@ export default function TutorClassesClient({ classes }: { classes: LiveClassItem
                               <span className="truncate">{item.title}</span>
                             </div>
                             <div className="text-[10px] text-primary/60 shrink-0 font-medium ml-2">
-                              {itemDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })} •{" "}
-                              {itemDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
+                              {formatClassDate(item.scheduledAt)} • {formatClassTime(item.scheduledAt)}
                             </div>
                           </div>
                         );

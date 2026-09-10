@@ -1,120 +1,166 @@
-import { ClassEnrollment, LiveClass, User } from "@/models";
+import { ClassEnrollment, LiveClass, User, Membership } from "@/models";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import Image from "next/image";
+import TutorStudentsClient, { TutorStudentItem } from "@/components/tutor/TutorStudentsClient";
 
 export const metadata = {
-  title: 'My Students | Shree Fertility Academy',
+  title: "My Students & Credits | Shree Fertility Academy",
 };
 
 export default async function TutorStudentsPage() {
   const session = await getServerSession(authOptions);
-  
-  if (!session || session.user.role !== "TUTOR") {
-    redirect("/login");
+
+  if (!session || (session.user.role !== "TUTOR" && session.user.role !== "ADMIN")) {
+    redirect("/tutor/login");
   }
 
-  // Fetch unique students enrolled in the tutor's classes
-  const enrollments = await ClassEnrollment.findAll({
+  const tutorId = session.user.id;
+  const now = new Date();
+
+  // 1. Fetch all students who have enrolled in this tutor's classes or have active memberships
+  const rawEnrollments = await ClassEnrollment.findAll({
     include: [
       {
         model: User,
-        as: 'student'
+        as: "student",
+        attributes: ["id", "name", "email", "image", "phone"],
+        include: [
+          {
+            model: Membership,
+            as: "memberships",
+            attributes: ["id", "maxClasses", "usedClasses", "status", "validUntil", "createdAt"],
+          },
+        ],
       },
       {
         model: LiveClass,
-        as: 'session',
-        where: {
-          tutorId: session.user.id
-        }
-      }
+        as: "session",
+        where: { tutorId },
+        attributes: ["id", "title", "scheduledAt", "status", "meetingUrl", "recordingUrl"],
+      },
     ],
-    order: [['createdAt', 'DESC']]
+    order: [["createdAt", "DESC"]],
   });
 
-  // Group by student
-  const studentMap = new Map();
-  for (const enrollment of enrollments) {
-    const student = (enrollment as any).student;
-    if (!studentMap.has(student.id)) {
-      studentMap.set(student.id, {
-        id: student.id,
-        name: student.name,
-        email: student.email,
-        image: student.image,
-        enrollments: []
+  // Group enrollments and calculate credit balances per student
+  const studentMap = new Map<string, any>();
+
+  for (const enrollment of rawEnrollments) {
+    const rawStudent = (enrollment as any).student;
+    if (!rawStudent) continue;
+
+    const studentJson = rawStudent.toJSON ? rawStudent.toJSON() : rawStudent;
+    const sessionJson = (enrollment as any).session?.toJSON
+      ? (enrollment as any).session.toJSON()
+      : (enrollment as any).session;
+
+    if (!studentMap.has(studentJson.id)) {
+      // Calculate membership credits
+      const memberships = studentJson.memberships || [];
+      const totalCredits = memberships.reduce((sum: number, m: any) => sum + (m.maxClasses || 0), 0);
+      const usedCredits = memberships.reduce((sum: number, m: any) => sum + (m.usedClasses || 0), 0);
+      const pendingCredits = Math.max(0, totalCredits - usedCredits);
+      
+      const activeMembership = memberships.find((m: any) => m.status === "ACTIVE") || memberships[0];
+      const membershipStatus = activeMembership ? activeMembership.status : "INACTIVE";
+      const validUntil = activeMembership ? activeMembership.validUntil : null;
+
+      studentMap.set(studentJson.id, {
+        id: studentJson.id,
+        name: studentJson.name,
+        email: studentJson.email,
+        image: studentJson.image,
+        phone: studentJson.phone,
+        totalCredits,
+        usedCredits,
+        pendingCredits,
+        membershipStatus,
+        validUntil,
+        classesWithTutor: [],
       });
     }
-    studentMap.get(student.id).enrollments.push(enrollment);
+
+    if (sessionJson) {
+      const scheduledDate = new Date(sessionJson.scheduledAt);
+      const isPast = scheduledDate < now || sessionJson.status === "COMPLETED";
+
+      studentMap.get(studentJson.id).classesWithTutor.push({
+        id: sessionJson.id,
+        title: sessionJson.title,
+        scheduledAt: sessionJson.scheduledAt,
+        status: sessionJson.status,
+        meetingUrl: sessionJson.meetingUrl,
+        recordingUrl: sessionJson.recordingUrl,
+        enrollmentStatus: (enrollment as any).status,
+        isPast,
+      });
+    }
   }
 
-  const students = Array.from(studentMap.values());
+  // 2. Also include all other active students with memberships if any
+  const allActiveStudents = await User.findAll({
+    where: { role: "STUDENT" },
+    attributes: ["id", "name", "email", "image", "phone"],
+    include: [
+      {
+        model: Membership,
+        as: "memberships",
+        attributes: ["id", "maxClasses", "usedClasses", "status", "validUntil", "createdAt"],
+      },
+    ],
+  });
 
-  return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-b border-secondary/30 pb-6">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-black text-primary tracking-tight font-playfair">My Students</h1>
-          <p className="text-primary/70 mt-2 font-sans text-base sm:text-lg">View and manage students enrolled in your live classes.</p>
-        </div>
-      </div>
+  for (const stu of allActiveStudents) {
+    const studentJson = stu.toJSON() as any;
+    if (studentJson?.id && !studentMap.has(studentJson.id)) {
+      const memberships = studentJson.memberships || [];
+      if (memberships.length === 0) continue; // Skip students without any membership
 
-      <div className="bg-white rounded-3xl border border-secondary/30 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-secondary/10 border-b border-secondary/30">
-                <th className="p-6 font-black text-primary font-playfair tracking-tight">Student</th>
-                <th className="p-6 font-black text-primary font-playfair tracking-tight">Classes Enrolled</th>
-                <th className="p-6 font-black text-primary font-playfair tracking-tight">Contact</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="p-12 text-center text-primary/50 font-bold">
-                    No students found. Schedule a class to get started!
-                  </td>
-                </tr>
-              ) : (
-                students.map((student) => (
-                  <tr key={student.id} className="border-b border-secondary/10 hover:bg-secondary/5 transition-colors group">
-                    <td className="p-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-secondary/50 overflow-hidden relative shadow-sm">
-                          {student.image ? (
-                            <Image src={student.image} alt={student.name || 'Student'} fill className="object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-primary text-white font-black font-playfair">
-                              {student.name?.charAt(0) || 'S'}
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <div className="font-bold text-primary group-hover:text-accent transition-colors">
-                            {student.name || 'Unknown Student'}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-6">
-                      <span className="inline-flex items-center justify-center bg-primary/5 text-primary font-bold text-sm h-8 px-4 rounded-full">
-                        {student.enrollments.length} {student.enrollments.length === 1 ? 'Class' : 'Classes'}
-                      </span>
-                    </td>
-                    <td className="p-6">
-                      <div className="text-sm text-primary/70 font-medium">
-                        {student.email}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+      const totalCredits = memberships.reduce((sum: number, m: any) => sum + (m.maxClasses || 0), 0);
+      const usedCredits = memberships.reduce((sum: number, m: any) => sum + (m.usedClasses || 0), 0);
+      const pendingCredits = Math.max(0, totalCredits - usedCredits);
+      const activeMembership = memberships.find((m: any) => m.status === "ACTIVE") || memberships[0];
+
+      studentMap.set(studentJson.id, {
+        id: studentJson.id,
+        name: studentJson.name,
+        email: studentJson.email,
+        image: studentJson.image,
+        phone: studentJson.phone,
+        totalCredits,
+        usedCredits,
+        pendingCredits,
+        membershipStatus: activeMembership ? activeMembership.status : "INACTIVE",
+        validUntil: activeMembership ? activeMembership.validUntil : null,
+        classesWithTutor: [],
+      });
+    }
+  }
+
+  // Convert map to TutorStudentItem array
+  const students: TutorStudentItem[] = Array.from(studentMap.values()).map((s: any) => {
+    const classes = s.classesWithTutor || [];
+    const attendedCount = classes.filter((c: any) => c.isPast || c.status === "COMPLETED").length;
+    const upcomingCount = classes.filter((c: any) => !c.isPast && c.status !== "COMPLETED" && c.status !== "CANCELLED").length;
+
+    return {
+      id: s.id,
+      name: s.name,
+      email: s.email,
+      image: s.image,
+      phone: s.phone,
+      totalCredits: s.totalCredits,
+      usedCredits: s.usedCredits,
+      pendingCredits: s.pendingCredits,
+      membershipStatus: s.membershipStatus,
+      validUntil: s.validUntil,
+      totalClassesWithTutor: classes.length,
+      attendedClassesWithTutor: attendedCount,
+      upcomingClassesWithTutor: upcomingCount,
+      tutorClassHistory: classes,
+    };
+  });
+
+  return <TutorStudentsClient students={students} />;
 }

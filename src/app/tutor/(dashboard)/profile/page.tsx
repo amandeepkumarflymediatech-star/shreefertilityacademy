@@ -26,7 +26,7 @@ export default async function TutorProfilePage() {
         
         <div className="relative z-10 flex flex-col justify-between items-start">
           <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight font-playfair drop-shadow-sm">My Profile</h1>
-          <p className="text-secondary mt-3 font-sans text-lg sm:text-xl font-medium max-w-lg">Manage your public presence and showcase your expertise to students.</p>
+          <p className="text-white   mt-3 font-sans text-lg sm:text-xl font-medium max-w-lg">Manage your public presence and showcase your expertise to students.</p>
         </div>
       </div>
 

@@ -539,13 +539,21 @@ async function seed() {
   const tutorAnanya = tutorInstances['ananya.sen@shreefertility.com'];
   const tutorVikram = tutorInstances['vikram.malhotra@shreefertility.com'];
 
+  // Helper to generate clean, realistic slot times (e.g. 10:00 AM, 3:00 PM, 5:30 PM)
+  const getSlotDate = (daysOffset: number, hour: number, minute = 0) => {
+    const d = new Date();
+    d.setDate(d.getDate() + daysOffset);
+    d.setHours(hour, minute, 0, 0);
+    return d;
+  };
+
   const dummyLiveClasses = [
     // --- Dr. Priya Sharma Classes ---
     {
       tutorId: tutorPriya?.id || admin.id,
       title: 'Interactive Case Conference: Optimizing Day 5 Blastocyst Culture',
       description: 'Hands-on review of slow developing Day 3 embryos, media formulations, and troubleshooting high fragmentation rates.',
-      scheduledAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000), // +2 days at 10 AM
+      scheduledAt: getSlotDate(2, 10, 0), // +2 days at 10:00 AM
       meetingUrl: 'https://meet.google.com/shree-ivf-priya',
       status: 'SCHEDULED',
       studentsToEnroll: [student1, student2, student3, student4],
@@ -554,7 +562,7 @@ async function seed() {
       tutorId: tutorPriya?.id || admin.id,
       title: 'Live Lab Practicum: ICSI Injection Needle Alignment & PVP Dynamics',
       description: 'Micromanipulator joystick sensitivity calibration, hydraulic pressure adjustments, and avoiding zona cracking.',
-      scheduledAt: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000), // +8 days
+      scheduledAt: getSlotDate(8, 15, 0), // +8 days at 3:00 PM
       meetingUrl: 'https://meet.google.com/shree-icsi-practicum',
       status: 'SCHEDULED',
       studentsToEnroll: [student1, student2, student5],
@@ -563,7 +571,7 @@ async function seed() {
       tutorId: tutorPriya?.id || admin.id,
       title: 'Past Workshop: Gamete Handling Under Cleanroom Laminar Airflow',
       description: 'Temperature and pH monitoring during extended micromanipulation procedures.',
-      scheduledAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000), // -4 days (History)
+      scheduledAt: getSlotDate(-4, 16, 30), // -4 days at 4:30 PM (History)
       meetingUrl: 'https://meet.google.com/shree-gamete-archive',
       recordingUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       status: 'COMPLETED',
@@ -575,7 +583,7 @@ async function seed() {
       tutorId: tutorRajesh?.id || admin.id,
       title: 'Live Surgical Review: Micro-TESE in Non-Obstructive Azoospermia (NOA)',
       description: 'High-definition video review of seminiferous tubule dissection with live audio commentary and Q&A.',
-      scheduledAt: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000 + 6 * 60 * 60 * 1000), // +4 days
+      scheduledAt: getSlotDate(4, 18, 0), // +4 days at 6:00 PM
       meetingUrl: 'https://meet.google.com/shree-ivf-rajesh',
       status: 'SCHEDULED',
       studentsToEnroll: [student1, student3, student4, student5],
@@ -584,7 +592,7 @@ async function seed() {
       tutorId: tutorRajesh?.id || admin.id,
       title: 'Past Masterclass: Interpreting Advanced Semen DNA Fragmentation (DFI)',
       description: 'Clinical correlations between elevated DFI and recurrent implantation failure, with antioxidant therapies review.',
-      scheduledAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000), // -6 days (History)
+      scheduledAt: getSlotDate(-6, 11, 0), // -6 days at 11:00 AM (History)
       meetingUrl: 'https://meet.google.com/shree-dfi-archive',
       recordingUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       status: 'COMPLETED',
@@ -596,7 +604,7 @@ async function seed() {
       tutorId: tutorAnanya?.id || admin.id,
       title: 'Live Interactive: Tailored Stimulation for Poor Ovarian Responders (POR)',
       description: 'Microdose flare protocols, dual ovarian stimulation (DuoStim), and adjuvant growth hormone therapies.',
-      scheduledAt: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000), // +6 days
+      scheduledAt: getSlotDate(6, 14, 0), // +6 days at 2:00 PM
       meetingUrl: 'https://meet.google.com/shree-ivf-ananya',
       status: 'SCHEDULED',
       studentsToEnroll: [student1, student2, student4, student5],
@@ -605,7 +613,7 @@ async function seed() {
       tutorId: tutorAnanya?.id || admin.id,
       title: 'Ovarian Stimulation Protocols for High Responders & OHSS Prevention',
       description: 'GnRH antagonist protocols, dual trigger strategies, and total freeze rationale.',
-      scheduledAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000), // -3 days (History)
+      scheduledAt: getSlotDate(-3, 17, 0), // -3 days at 5:00 PM (History)
       meetingUrl: 'https://meet.google.com/shree-ohss-archive',
       recordingUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       status: 'COMPLETED',
@@ -617,7 +625,7 @@ async function seed() {
       tutorId: tutorVikram?.id || admin.id,
       title: 'Laser-Assisted Hatching & Trophectoderm Biopsy for PGT-A',
       description: 'Multipulse diode laser firing techniques, mechanical tearing vs laser cutting, and sample tubing preparation.',
-      scheduledAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000), // +10 days
+      scheduledAt: getSlotDate(10, 11, 30), // +10 days at 11:30 AM
       meetingUrl: 'https://meet.google.com/shree-pgta-biopsy',
       status: 'SCHEDULED',
       studentsToEnroll: [student1, student2, student3],

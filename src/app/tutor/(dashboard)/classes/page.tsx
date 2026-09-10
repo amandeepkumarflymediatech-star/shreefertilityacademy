@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { LiveClass, ClassEnrollment, User } from "@/models";
+import { LiveClass, ClassEnrollment, User, Membership } from "@/models";
 import TutorClassesClient from "@/components/tutor/TutorClassesClient";
 
 export default async function TutorClassesPage() {
@@ -24,6 +24,13 @@ export default async function TutorClassesPage() {
             model: User,
             as: "student",
             attributes: ["id", "name", "email", "image", "phone"],
+            include: [
+              {
+                model: Membership,
+                as: "memberships",
+                attributes: ["id", "maxClasses", "usedClasses", "status"],
+              },
+            ],
           },
         ],
       },

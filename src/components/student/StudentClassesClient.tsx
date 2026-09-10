@@ -25,6 +25,7 @@ import {
   UserCheck
 } from "lucide-react";
 import { toast } from "sonner";
+import { formatClassTime, formatClassDate, formatClassDateTime } from "@/lib/date-utils";
 
 export type TutorUser = {
   id: string;
@@ -407,22 +408,13 @@ export default function StudentClassesClient({
                         <div className="flex items-center gap-2">
                           <CalendarIcon size={14} className="text-accent shrink-0" />
                           <span className="font-bold">
-                            {classDate.toLocaleDateString("en-US", {
-                              weekday: "short",
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
+                            {formatClassDate(cls.scheduledAt, true)}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock size={14} className="text-accent shrink-0" />
                           <span>
-                            {classDate.toLocaleTimeString("en-US", {
-                              hour: "numeric",
-                              minute: "2-digit",
-                              hour12: true,
-                            })}
+                            {formatClassTime(cls.scheduledAt)}
                           </span>
                         </div>
                       </div>
@@ -541,20 +533,11 @@ export default function StudentClassesClient({
                       <div className="p-3 bg-secondary/5 rounded-xl text-xs text-primary/70 space-y-1 mb-4">
                         <p className="flex items-center gap-1.5 font-medium">
                           <CalendarIcon size={13} className="text-accent" />
-                          {classDate.toLocaleDateString("en-US", {
-                            weekday: "short",
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                          {formatClassDate(cls.scheduledAt, true)}
                         </p>
                         <p className="flex items-center gap-1.5 text-primary/50 text-[11px]">
                           <Clock size={12} />
-                          {classDate.toLocaleTimeString("en-US", {
-                            hour: "numeric",
-                            minute: "2-digit",
-                            hour12: true,
-                          })}
+                          {formatClassTime(cls.scheduledAt)}
                         </p>
                       </div>
                     </div>
@@ -655,10 +638,7 @@ export default function StudentClassesClient({
                               <p className="font-bold text-primary truncate">{item.title}</p>
                               <div className="flex items-center justify-between text-[11px] text-primary/60">
                                 <span>
-                                  {new Date(item.scheduledAt).toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                  })} • {new Date(item.scheduledAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                                  {formatClassDate(item.scheduledAt)} • {formatClassTime(item.scheduledAt)}
                                 </span>
                                 {item.meetingUrl && (
                                   hasClassCredits || item.isEnrolled ? (
@@ -800,10 +780,7 @@ export default function StudentClassesClient({
                           <p className="font-bold truncate">{cls.title}</p>
                           <div className="flex items-center justify-between mt-1 text-[10px]">
                             <span className="text-primary/60 font-semibold">
-                              {new Date(cls.scheduledAt).toLocaleTimeString("en-US", {
-                                hour: "numeric",
-                                minute: "2-digit",
-                              })}
+                              {formatClassTime(cls.scheduledAt)}
                             </span>
                             {cls.meetingUrl && isUpcoming && (
                               hasClassCredits || cls.isEnrolled ? (
