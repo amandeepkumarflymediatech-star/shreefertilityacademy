@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { ContactMessage } from '@/models';
 import { sendContactUserConfirmation, sendContactAdminNotification } from '@/lib/email';
 
 export async function POST(req: Request) {
@@ -11,14 +11,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'All fields are required.' }, { status: 400 });
     }
 
-    const contactMessage = await prisma.contactMessage.create({
-      data: {
-        name,
-        email,
-        studyPreference,
-        message,
-      },
+    const contactMessage = await ContactMessage.create({
+      name,
+      email,
+      studyPreference,
+      message,
     });
+
 
     // Send email notifications (non-blocking)
     Promise.all([

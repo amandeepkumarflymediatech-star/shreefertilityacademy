@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import { SeoMetadata } from "@/models";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
@@ -20,8 +20,17 @@ export async function createSeo(formData: FormData) {
   const headerScripts = formData.get("headerScripts") as string;
   const footerScripts = formData.get("footerScripts") as string;
 
-  await prisma.seoMetadata.create({
-    data: { pagePath, title, description, keywords, ogImage, canonicalUrl, ogTitle, ogDescription, headerScripts, footerScripts }
+  await SeoMetadata.create({
+    pagePath,
+    title,
+    description: description || undefined,
+    keywords: keywords || undefined,
+    ogImage: ogImage || undefined,
+    canonicalUrl: canonicalUrl || undefined,
+    ogTitle: ogTitle || undefined,
+    ogDescription: ogDescription || undefined,
+    headerScripts: headerScripts || undefined,
+    footerScripts: footerScripts || undefined,
   });
 
   revalidatePath("/admin/seo");
@@ -42,10 +51,21 @@ export async function updateSeo(id: string, formData: FormData) {
   const headerScripts = formData.get("headerScripts") as string;
   const footerScripts = formData.get("footerScripts") as string;
 
-  await prisma.seoMetadata.update({
-    where: { id },
-    data: { pagePath, title, description, keywords, ogImage, canonicalUrl, ogTitle, ogDescription, headerScripts, footerScripts }
-  });
+  await SeoMetadata.update(
+    {
+      pagePath,
+      title,
+      description: description || undefined,
+      keywords: keywords || undefined,
+      ogImage: ogImage || undefined,
+      canonicalUrl: canonicalUrl || undefined,
+      ogTitle: ogTitle || undefined,
+      ogDescription: ogDescription || undefined,
+      headerScripts: headerScripts || undefined,
+      footerScripts: footerScripts || undefined,
+    },
+    { where: { id } }
+  );
 
   revalidatePath("/admin/seo");
 }
@@ -54,7 +74,7 @@ export async function deleteSeo(id: string) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "ADMIN") throw new Error("Unauthorized");
 
-  await prisma.seoMetadata.delete({
+  await SeoMetadata.destroy({
     where: { id }
   });
 

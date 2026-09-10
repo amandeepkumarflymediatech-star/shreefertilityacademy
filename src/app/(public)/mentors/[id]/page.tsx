@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { prisma } from '@/lib/db';
+import { User, Review } from '@/models';
 import Link from 'next/link';
 import { Star, CheckCircle2, Languages, Clock, ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -12,7 +12,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
-  const mentor = await prisma.user.findUnique({
+  const mentor = await User.findOne({
     where: { id: resolvedParams.id, role: 'TUTOR' },
   });
 
@@ -29,27 +29,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function MentorProfilePage({ params }: Props) {
   const resolvedParams = await params;
 
-  const mentor = await prisma.user.findUnique({
+  const mentor = await User.findOne({
     where: { 
       id: resolvedParams.id,
       role: 'TUTOR'
     },
-    include: {
-      tutorReviews: {
-        where: { isActive: true },
-        include: {
-          student: {
-            select: { name: true }
-          }
-        },
-        orderBy: { createdAt: 'desc' }
-      }
-    }
-  });
+    include: [{
+      model: Review,
+      as: 'receivedReviews',
+      where: { isActive: true },
+      required: false,
+      include: [{
+        model: User,
+        as: 'student',
+        attributes: ['name']
+      }]
+    }]
+  }) as any;
 
   if (!mentor) {
     notFound();
   }
+
+  const reviews = mentor.receivedReviews || [];
+
 
   return (
     <div className="w-full bg-[#F7F5F0] min-h-screen pt-32 pb-24">
@@ -86,11 +89,11 @@ export default async function MentorProfilePage({ params }: Props) {
                 <div className="px-3 py-1 bg-accent/10 text-accent font-bold uppercase tracking-widest text-xs rounded-full">
                   Verified Mentor
                 </div>
-                {mentor.tutorReviews.length > 0 && (
+                {reviews.length > 0 && (
                   <div className="flex items-center gap-1 text-primary font-bold text-sm">
                     <Star className="w-4 h-4 text-accent fill-current" />
                     <span>5.0</span>
-                    <span className="text-primary/50 font-normal">({mentor.tutorReviews.length} reviews)</span>
+                    <span className="text-primary/50 font-normal">({reviews.length} reviews)</span>
                   </div>
                 )}
               </div>
@@ -156,11 +159,11 @@ export default async function MentorProfilePage({ params }: Props) {
         </div>
 
         {/* Reviews Section */}
-        {mentor.tutorReviews.length > 0 && (
+        {reviews.length > 0 && (
           <div>
             <h2 className="text-2xl font-bold font-playfair text-primary mb-6">Student Reviews</h2>
             <div className="grid grid-cols-1 gap-6">
-              {mentor.tutorReviews.map((review) => (
+              {reviews.map((review: any) => (
                 <div key={review.id} className="bg-white p-8 rounded-2xl shadow-sm border border-primary/5">
                   <div className="flex text-accent mb-4">
                     {[...Array(review.rating)].map((_, j) => <Star key={j} size={16} fill="currentColor" />)}
@@ -181,6 +184,7 @@ export default async function MentorProfilePage({ params }: Props) {
             </div>
           </div>
         )}
+
 
       </div>
     </div>

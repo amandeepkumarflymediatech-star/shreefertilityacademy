@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { BlogPost, User } from "@/models";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -11,13 +11,17 @@ export default async function AdminBlogPage() {
     redirect("/login");
   }
 
-  // @ts-ignore - Bypass IDE cache issue
-  const posts = await prisma.blogPost.findMany({
-    include: {
-      author: { select: { name: true, email: true } }
-    },
-    orderBy: { createdAt: 'desc' }
+  const rawPosts = await BlogPost.findAll({
+    include: [{
+      model: User,
+      as: 'author',
+      attributes: ['name', 'email']
+    }],
+    order: [['createdAt', 'DESC']]
   });
+
+  const posts = JSON.parse(JSON.stringify(rawPosts));
+
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans">

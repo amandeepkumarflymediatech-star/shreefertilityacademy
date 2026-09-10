@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { User } from "@/models";
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,28 +36,30 @@ export async function POST(req: NextRequest) {
       action === "SUBMIT" ? "UNDER_REVIEW" : "IN_PROGRESS";
 
     // Update user profile
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        name: name || undefined,
-        phone: phone || null,
-        timezone: timezone || null,
-        bio: bio || null,
-        experience: experience || null,
-        qualifications: qualifications || null,
-        languages: languages || null,
-        teachingHeadline: teachingHeadline || null,
-        teachingLevels: teachingLevels || null,
-        teachingAges: teachingAges || null,
-        teachingStyle: teachingStyle || null,
-        onboardingStatus,
-      },
+    await User.update({
+      name: name || undefined,
+      phone: phone || undefined,
+      timezone: timezone || undefined,
+      bio: bio || undefined,
+      experience: experience || undefined,
+      qualifications: qualifications || undefined,
+      languages: languages || undefined,
+      teachingHeadline: teachingHeadline || undefined,
+      teachingLevels: teachingLevels || undefined,
+      teachingAges: teachingAges || undefined,
+      teachingStyle: teachingStyle || undefined,
+      onboardingStatus,
+    }, {
+      where: { id: userId }
     });
+
+    const updatedUser = await User.findByPk(userId);
 
     return NextResponse.json({
       success: true,
       user: updatedUser,
     });
+
   } catch (error: any) {
     console.error("Error in tutor application API:", error);
     return NextResponse.json(

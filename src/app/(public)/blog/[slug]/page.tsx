@@ -1,17 +1,17 @@
 // Force cache invalidate
 import React from 'react';
-import { prisma } from '@/lib/db';
+import { BlogPost, User } from '@/models';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { ArrowLeft, Calendar, User, Tag } from 'lucide-react';
+import { ArrowLeft, Calendar, User as UserIcon, Tag } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = await prisma.blogPost.findUnique({ where: { slug } });
+  const post = await BlogPost.findOne({ where: { slug } }) as any;
   if (!post) return { title: 'Not Found | Shree Fertility Academy' };
   
   return {
@@ -22,18 +22,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = await prisma.blogPost.findUnique({
+  const post = await BlogPost.findOne({
     where: { slug, published: true },
-    include: {
-      author: {
-        select: { name: true, image: true, bio: true }
-      }
-    }
-  });
+    include: [{
+      model: User,
+      as: 'author',
+      attributes: ['name', 'image', 'bio']
+    }]
+  }) as any;
 
   if (!post) {
     notFound();
   }
+
 
   return (
     <main className="min-h-screen bg-white">
@@ -55,7 +56,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
           {post.tags && (
             <div className="flex gap-2 mb-6 flex-wrap">
-              {post.tags.split(',').map(tag => (
+              {post.tags.split(',').map((tag: string) => (
                 <span key={tag} className="text-[10px] font-bold uppercase tracking-widest text-blue-700 bg-blue-100/50 border border-blue-200/50 px-3 py-1.5 rounded-full shadow-sm">
                   {tag.trim()}
                 </span>
@@ -73,7 +74,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 {post.author.image ? (
                   <Image src={post.author.image} alt={post.author.name || ''} width={40} height={40} className="object-cover" />
                 ) : (
-                  <User size={18} className="text-slate-400" />
+                  <UserIcon size={18} className="text-slate-400" />
                 )}
               </div>
               <div>
@@ -123,9 +124,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             {post.author.image ? (
               <Image src={post.author.image} alt={post.author.name || ''} width={96} height={96} className="object-cover" />
             ) : (
-              <User size={40} className="text-slate-300" />
+              <UserIcon size={40} className="text-slate-300" />
             )}
           </div>
+
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-1">Written by</p>
             <h3 className="text-2xl font-black text-slate-900 font-playfair mb-3">{post.author.name || 'Shree Fertility Academy Admin'}</h3>

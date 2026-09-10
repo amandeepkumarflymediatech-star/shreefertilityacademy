@@ -21,7 +21,7 @@ export default async function AdminUsersPage() {
     order: [['createdAt', 'DESC']]
   });
   
-  const users = userInstances.map(u => u.get({ plain: true }));
+  const users = userInstances.map(u => u.get({ plain: true })) as any;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans">
@@ -29,3 +29,4 @@ export default async function AdminUsersPage() {
     </div>
   );
 }
+

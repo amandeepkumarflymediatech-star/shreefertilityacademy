@@ -1,6 +1,7 @@
 'use server';
 
-import { prisma } from '@/lib/db';
+import { Coupon } from '@/models';
+import { Op } from 'sequelize';
 import { revalidatePath } from 'next/cache';
 
 export async function createCoupon(data: {
@@ -12,7 +13,7 @@ export async function createCoupon(data: {
   validUntil?: Date;
 }) {
   try {
-    const existing = await prisma.coupon.findUnique({
+    const existing = await Coupon.findOne({
       where: { code: data.code.toUpperCase() }
     });
 
@@ -20,15 +21,13 @@ export async function createCoupon(data: {
       return { success: false, error: 'Coupon code already exists.' };
     }
 
-    await prisma.coupon.create({
-      data: {
-        code: data.code.toUpperCase(),
-        description: data.description,
-        discountType: data.discountType,
-        discountValue: data.discountValue,
-        maxUses: data.maxUses || null,
-        validUntil: data.validUntil || null,
-      }
+    await Coupon.create({
+      code: data.code.toUpperCase(),
+      description: data.description,
+      discountType: data.discountType,
+      discountValue: data.discountValue,
+      maxUses: data.maxUses || undefined,
+      validUntil: data.validUntil || undefined,
     });
 
     revalidatePath('/admin/coupons');
@@ -41,10 +40,10 @@ export async function createCoupon(data: {
 
 export async function toggleCouponStatus(id: string, currentStatus: boolean) {
   try {
-    await prisma.coupon.update({
-      where: { id },
-      data: { isActive: !currentStatus }
-    });
+    await Coupon.update(
+      { isActive: !currentStatus },
+      { where: { id } }
+    );
     revalidatePath('/admin/coupons');
     return { success: true };
   } catch (error) {
@@ -54,7 +53,7 @@ export async function toggleCouponStatus(id: string, currentStatus: boolean) {
 
 export async function deleteCoupon(id: string) {
   try {
-    await prisma.coupon.delete({
+    await Coupon.destroy({
       where: { id }
     });
     revalidatePath('/admin/coupons');
@@ -73,24 +72,23 @@ export async function updateCoupon(id: string, data: {
   validUntil?: Date;
 }) {
   try {
-    const existing = await prisma.coupon.findFirst({
-      where: { code: data.code.toUpperCase(), NOT: { id } }
+    const existing = await Coupon.findOne({
+      where: { code: data.code.toUpperCase(), id: { [Op.ne]: id } }
     });
 
     if (existing) {
       return { success: false, error: 'Coupon code already exists.' };
     }
 
-    await prisma.coupon.update({
-      where: { id },
-      data: {
-        code: data.code.toUpperCase(),
-        description: data.description,
-        discountType: data.discountType,
-        discountValue: data.discountValue,
-        maxUses: data.maxUses || null,
-        validUntil: data.validUntil || null,
-      }
+    await Coupon.update({
+      code: data.code.toUpperCase(),
+      description: data.description,
+      discountType: data.discountType,
+      discountValue: data.discountValue,
+      maxUses: data.maxUses || undefined,
+      validUntil: data.validUntil || undefined,
+    }, {
+      where: { id }
     });
 
     revalidatePath('/admin/coupons');
@@ -100,3 +98,4 @@ export async function updateCoupon(id: string, data: {
     return { success: false, error: 'Failed to update coupon.' };
   }
 }
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { prisma } from '@/lib/db';
+import { BlogPost, User } from '@/models';
 import { Calendar } from 'lucide-react';
 import BlogListClient from './BlogListClient';
 
@@ -11,15 +11,17 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function BlogPage() {
-  const posts = await prisma.blogPost.findMany({
+  const rawPosts = await BlogPost.findAll({
     where: { published: true },
-    orderBy: { createdAt: 'desc' },
-    include: {
-      author: {
-        select: { name: true, image: true }
-      }
-    }
+    order: [['createdAt', 'DESC']],
+    include: [{
+      model: User,
+      as: 'author',
+      attributes: ['name', 'image']
+    }]
   });
+  const posts = JSON.parse(JSON.stringify(rawPosts));
+
 
   return (
     <main className="min-h-screen bg-slate-50 pt-32 pb-24">

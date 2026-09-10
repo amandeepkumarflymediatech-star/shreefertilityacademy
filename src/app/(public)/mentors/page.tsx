@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Star, CheckCircle2, Languages, Clock } from 'lucide-react';
-import { prisma } from '@/lib/db';
+import { User, Review } from '@/models';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
@@ -32,32 +32,26 @@ export default async function MentorsPage() {
   };
 
   // Fetch available mentors
-  const mentors = await prisma.user.findMany({
+  const mentors = await User.findAll({
     where: { 
       role: 'TUTOR',
       isApproved: true,
       isActive: true
     },
-    select: {
-      id: true,
-      name: true,
-      image: true,
-      bio: true,
-      experience: true,
-      languages: true,
-    }
+    attributes: ['id', 'name', 'image', 'bio', 'experience', 'languages']
   });
 
   // Fetch student reviews
-  const reviews = await (prisma as any).review.findMany({
+  const reviews = await Review.findAll({
     where: { isActive: true },
-    include: {
-      student: { select: { name: true } },
-      tutor: { select: { name: true } }
-    },
-    orderBy: { createdAt: 'desc' },
-    take: 10
+    include: [
+      { model: User, as: 'student', attributes: ['name'] },
+      { model: User, as: 'tutor', attributes: ['name'] }
+    ],
+    order: [['createdAt', 'DESC']],
+    limit: 10
   });
+
 
   return (
     <div className="w-full bg-slate-50 pt-32 pb-24 min-h-screen font-inter selection:bg-accent selection:text-white relative overflow-hidden">

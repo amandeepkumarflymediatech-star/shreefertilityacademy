@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { Order, PricingPackage } from "@/models";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -13,13 +13,15 @@ export default async function StudentPurchasesPage() {
   }
 
   // Fetch paid orders for invoices
-  const paidOrders = await prisma.order.findMany({
+  const paidOrders = await Order.findAll({
     where: { studentId: session.user.id, status: 'PAID' },
-    orderBy: { createdAt: 'desc' },
-    include: {
-      membership: true
-    }
+    order: [['createdAt', 'DESC']],
+    include: [{
+      model: PricingPackage,
+      as: 'package'
+    }]
   });
+
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 font-sans">

@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { Course } from "@/models";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
@@ -10,16 +10,15 @@ async function createCourse(formData: FormData) {
   
   if (!title) return;
 
-  const course = await prisma.course.create({
-    data: {
-      title,
-      description,
-      isPublished: false,
-    }
+  const course = await Course.create({
+    title,
+    description: description || undefined,
+    isPublished: false,
   });
 
   redirect(`/admin/courses/${course.id}`);
 }
+
 
 export default function NewCoursePage() {
   return (

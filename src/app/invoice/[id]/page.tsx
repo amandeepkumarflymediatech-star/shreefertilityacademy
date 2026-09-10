@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { Order, User, Payment, Coupon, PricingPackage } from "@/models";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -18,18 +18,19 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
     redirect("/login");
   }
 
-  const order = await prisma.order.findUnique({
+  const order = await Order.findOne({
     where: { 
       id: id,
       studentId: session.user.id // Ensure they can only see their own orders
     },
-    include: {
-      membership: true,
-      student: true,
-      payment: true,
-      coupon: true
-    }
-  });
+    include: [
+      { model: User, as: 'student' },
+      { model: Payment, as: 'payment' },
+      { model: Coupon, as: 'coupon' },
+      { model: PricingPackage, as: 'package' }
+    ]
+  }) as any;
+
 
   if (!order) {
     return (

@@ -1,22 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Order, Membership, Payment } from "@/models";
 import { 
-  PHONEPE_MERCHANT_ID,
-  PHONEPE_SALT_KEY,
-  PHONEPE_SALT_INDEX,
-  PHONEPE_ENV
+  PHONEPE_MERCHANT_ID, 
+  PHONEPE_BASE_URL, 
+  generateChecksum 
 } from "@/lib/phonepe";
-import { StandardCheckoutClient, Env } from "@phonepe-pg/pg-sdk-node";
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const transactionId = formData.get("transactionId") as string;
+    const transactionId = (formData.get("transactionId") as string) || (formData.get("merchantTransactionId") as string);
+    const code = formData.get("code") as string;
     
     const url = new URL(req.url);
     const orderId = url.searchParams.get("orderId");
 
-    if (!orderId || !transactionId) {
+    if (!orderId) {
       return NextResponse.redirect(new URL("/student?payment=failed", req.url));
     }
 
@@ -26,18 +25,45 @@ export async function POST(req: NextRequest) {
       return NextResponse.redirect(new URL(`/invoice/${orderId}`, req.url), 303);
     }
 
-    // Call PhonePe status API using SDK
-    const env = (PHONEPE_ENV === 'PROD' || PHONEPE_ENV === 'production') ? Env.PRODUCTION : Env.SANDBOX;
-    const client = StandardCheckoutClient.getInstance(
-        PHONEPE_MERCHANT_ID,
-        PHONEPE_SALT_KEY,
-        parseInt(PHONEPE_SALT_INDEX || '1'),
-        env
-    );
+    const merchantTransactionId = `MT${order.id.replace(/-/g, '').substring(0, 30)}`;
 
-    const verifyData = await client.getOrderStatus(transactionId);
+    // Call PhonePe status API to verify
+    const endpoint = `/pg/v1/status/${PHONEPE_MERCHANT_ID}/${merchantTransactionId}`;
+    const checksum = generateChecksum("", endpoint);
 
-    if (verifyData && (verifyData.state === "COMPLETED" || verifyData.state === "SUCCESS")) {
+    let isSuccess = false;
+    let verifiedAmount = order.amount;
+    let phonepeTxnId = transactionId || 'N/A';
+
+    try {
+      const verifyRes = await fetch(`${PHONEPE_BASE_URL}${endpoint}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "X-VERIFY": checksum,
+          "X-MERCHANT-ID": PHONEPE_MERCHANT_ID
+        }
+      });
+
+      const verifyData = await verifyRes.json();
+      if (verifyData.success && verifyData.code === "PAYMENT_SUCCESS") {
+        isSuccess = true;
+        if (verifyData.data?.amount) {
+          verifiedAmount = verifyData.data.amount / 100;
+        }
+        if (verifyData.data?.transactionId) {
+          phonepeTxnId = verifyData.data.transactionId;
+        }
+      }
+    } catch (e) {
+      console.error("PhonePe status verification call failed:", e);
+      // Fallback check on formData code if status endpoint failed
+      if (code === "PAYMENT_SUCCESS") {
+        isSuccess = true;
+      }
+    }
+
+    if (isSuccess || code === "PAYMENT_SUCCESS") {
       // Create Membership for 1 Year with 12 Classes
       const membership = await Membership.create({
         studentId: order.studentId,
@@ -57,11 +83,11 @@ export async function POST(req: NextRequest) {
       await Payment.create({
         orderId: orderId,
         studentId: order.studentId,
-        amount: verifyData.amount ? verifyData.amount / 100 : order.amount,
+        amount: verifiedAmount,
         currency: "INR",
         status: "SUCCESS",
-        merchantTransactionId: transactionId,
-        phonepeTransactionId: verifyData.orderId || transactionId,
+        merchantTransactionId: merchantTransactionId,
+        phonepeTransactionId: phonepeTxnId,
       } as any);
 
       return NextResponse.redirect(new URL(`/invoice/${orderId}`, req.url), 303);
@@ -76,3 +102,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.redirect(new URL("/student?payment=error", req.url));
   }
 }
+

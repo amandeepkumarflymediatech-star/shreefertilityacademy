@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import { BlogPost } from "@/models";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
@@ -17,18 +17,15 @@ export async function createBlogPost(formData: FormData) {
   const coverImage = formData.get("coverImage") as string | null;
   const published = formData.get("published") === "true";
 
-  // @ts-ignore - Bypass IDE cache issue
-  await prisma.blogPost.create({
-    data: {
-      title,
-      slug,
-      content,
-      excerpt,
-      tags,
-      coverImage,
-      published,
-      authorId: session.user.id
-    }
+  await BlogPost.create({
+    title,
+    slug,
+    content,
+    excerpt: excerpt || undefined,
+    tags: tags || undefined,
+    coverImage: coverImage || undefined,
+    published,
+    authorId: session.user.id
   });
 
   revalidatePath("/admin/blog");
@@ -46,11 +43,10 @@ export async function updateBlogPost(id: string, formData: FormData) {
   const coverImage = formData.get("coverImage") as string | null;
   const published = formData.get("published") === "true";
 
-  // @ts-ignore - Bypass IDE cache issue
-  await prisma.blogPost.update({
-    where: { id },
-    data: { title, slug, content, excerpt, tags, coverImage, published }
-  });
+  await BlogPost.update(
+    { title, slug, content, excerpt: excerpt || undefined, tags: tags || undefined, coverImage: coverImage || undefined, published },
+    { where: { id } }
+  );
 
   revalidatePath("/admin/blog");
 }
@@ -59,8 +55,7 @@ export async function deleteBlogPost(id: string) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "ADMIN") throw new Error("Unauthorized");
 
-  // @ts-ignore - Bypass IDE cache issue
-  await prisma.blogPost.delete({
+  await BlogPost.destroy({
     where: { id }
   });
 

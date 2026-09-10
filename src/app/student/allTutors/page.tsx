@@ -1,5 +1,5 @@
 import React from 'react';
-import { prisma } from '@/lib/db';
+import { User } from '@/models';
 import Image from 'next/image';
 import { GraduationCap, CheckCircle2 } from 'lucide-react';
 
@@ -8,12 +8,14 @@ export const metadata = {
 };
 
 export default async function AllTutorsPage() {
-  const tutors = await prisma.user.findMany({
+  const rawTutors = await User.findAll({
     where: {
       role: 'TUTOR',
       isApproved: true,
     }
   });
+  const tutors = JSON.parse(JSON.stringify(rawTutors));
+
 
   return (
     <div>
@@ -27,7 +29,7 @@ export default async function AllTutorsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {tutors.map((tutor) => (
+        {tutors.map((tutor: any) => (
           <div key={tutor.id} className="bg-white rounded-[2rem] p-8 border border-secondary/10 shadow-[0_10px_40px_rgba(36,16,79,0.03)] hover:shadow-xl hover:border-secondary/30 transition-all duration-300 group flex flex-col h-full">
             <div className="flex items-start gap-5 mb-5">
               <div className="w-16 h-16 rounded-2xl bg-secondary/10 overflow-hidden relative flex-shrink-0 shadow-inner">

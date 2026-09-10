@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { User } from "@/models";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -11,11 +11,14 @@ export default async function AdminTutorsPage() {
     redirect("/login");
   }
 
-  const tutors = await prisma.user.findMany({
+  const rawTutors = await User.findAll({
     where: { role: 'TUTOR' },
-    select: { id: true, name: true, email: true, createdAt: true, isApproved: true, experience: true, bio: true, qualifications: true },
-    orderBy: { createdAt: 'desc' }
+    attributes: ['id', 'name', 'email', 'createdAt', 'isApproved', 'experience', 'bio', 'qualifications'],
+    order: [['createdAt', 'DESC']]
   });
+
+  const tutors = JSON.parse(JSON.stringify(rawTutors));
+
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans">

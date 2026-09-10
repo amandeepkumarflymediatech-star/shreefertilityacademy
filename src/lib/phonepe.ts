@@ -1,14 +1,22 @@
 import crypto from 'crypto';
 
-export const PHONEPE_MERCHANT_ID = process.env.PHONEPE_MERCHANT_ID || 'PGTESTPAYUAT';
-export const PHONEPE_SALT_KEY = process.env.PHONEPE_SALT_KEY || '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399';
-export const PHONEPE_SALT_INDEX = process.env.PHONEPE_SALT_INDEX || '1';
-export const PHONEPE_ENV = process.env.PHONEPE_ENV || 'UAT'; // 'UAT' or 'PROD'
+export const isProd = 
+  process.env.PHONEPE_ENV === 'PROD' || 
+  process.env.PHONEPE_ENV === 'production' ||
+  (process.env.PHONEPE_ENV !== 'UAT' && 
+   process.env.PHONEPE_ENV !== 'SANDBOX' && 
+   process.env.PHONEPE_MERCHANT_ID && 
+   !process.env.PHONEPE_MERCHANT_ID.startsWith('PGTEST'));
 
-export const PHONEPE_BASE_URL = 
-  (PHONEPE_ENV === 'PROD' || PHONEPE_ENV === 'production')
-    ? 'https://api.phonepe.com/apis/hermes' 
-    : 'https://api-preprod.phonepe.com/apis/pg-sandbox';
+export const PHONEPE_ENV = isProd ? 'PROD' : 'UAT';
+
+export const PHONEPE_MERCHANT_ID = process.env.PHONEPE_MERCHANT_ID || (isProd ? 'M22DED07QHZJP_2606151144' : 'PGTESTPAYUAT');
+export const PHONEPE_SALT_KEY = process.env.PHONEPE_SALT_KEY || (isProd ? 'NmNmZTE5YTgtN2E4Mi00ZjA1LThmOTAtOTE2N2U2NDg3NGUy' : '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399');
+export const PHONEPE_SALT_INDEX = process.env.PHONEPE_SALT_INDEX || '1';
+
+export const PHONEPE_BASE_URL = process.env.PHONEPE_BASE_URL || (isProd
+  ? 'https://api.phonepe.com/apis/hermes' 
+  : 'https://api-preprod.phonepe.com/apis/pg-sandbox');
 
 /**
  * Generates the X-VERIFY checksum for PhonePe API

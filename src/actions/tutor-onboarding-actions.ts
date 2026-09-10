@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import { User } from "@/models";
 import { writeFile } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
@@ -17,7 +17,7 @@ export async function submitTutorApplication(formData: FormData) {
   }
 
   // Check if user already exists
-  let user = await prisma.user.findUnique({ where: { email } });
+  let user = await User.findOne({ where: { email } });
   
   if (user) {
     if (user.role === 'TUTOR') {
@@ -39,28 +39,23 @@ export async function submitTutorApplication(formData: FormData) {
   const qualifications = `CV: ${resumeUrl}`;
 
   if (!user) {
-    user = await prisma.user.create({
-      data: {
-        email,
-        name,
-        role: 'TUTOR',
-        onboardingStatus: 'UNDER_REVIEW',
-        experience,
-        bio,
-        qualifications,
-      }
+    user = await User.create({
+      email,
+      name,
+      role: 'TUTOR',
+      onboardingStatus: 'UNDER_REVIEW',
+      experience,
+      bio,
+      qualifications,
     });
   } else {
     // If student applies to be a tutor, update their role and fields
-    user = await prisma.user.update({
-      where: { email },
-      data: {
-        role: 'TUTOR',
-        onboardingStatus: 'UNDER_REVIEW',
-        experience,
-        bio,
-        qualifications,
-      }
+    await user.update({
+      role: 'TUTOR',
+      onboardingStatus: 'UNDER_REVIEW',
+      experience,
+      bio,
+      qualifications,
     });
   }
 
@@ -74,3 +69,4 @@ export async function submitTutorApplication(formData: FormData) {
 
   return { success: true, userId: user.id };
 }
+

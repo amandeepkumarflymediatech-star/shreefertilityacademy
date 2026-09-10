@@ -43,7 +43,7 @@ export interface UserAttributes {
   country?: string;
   zipCode?: string;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
@@ -136,7 +136,7 @@ export interface MembershipAttributes {
   maxClasses?: number;
   usedClasses?: number;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface MembershipCreationAttributes extends Optional<MembershipAttributes, 'id'> {}
@@ -165,7 +165,7 @@ export interface LiveClassAttributes {
   reminderSent24h?: boolean;
   reminderSent2h?: boolean;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface LiveClassCreationAttributes extends Optional<LiveClassAttributes, 'id'> {}
@@ -191,7 +191,7 @@ export interface ClassEnrollmentAttributes {
   studentId: string;
   status?: string;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface ClassEnrollmentCreationAttributes extends Optional<ClassEnrollmentAttributes, 'id'> {}
@@ -214,7 +214,7 @@ export interface OrderAttributes {
   currency?: string;
   status?: string;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface OrderCreationAttributes extends Optional<OrderAttributes, 'id'> {}
@@ -241,7 +241,7 @@ export interface PaymentAttributes {
   phonepeTransactionId?: string;
   status?: string;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface PaymentCreationAttributes extends Optional<PaymentAttributes, 'id'> {}
@@ -286,7 +286,7 @@ export interface WebhookEventAttributes {
   status?: string;
   error?: string;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface WebhookEventCreationAttributes extends Optional<WebhookEventAttributes, 'id'> {}
@@ -356,7 +356,7 @@ export interface PlatformSettingAttributes {
   key: string;
   value: string;
   description?: string;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface PlatformSettingCreationAttributes extends Optional<PlatformSettingAttributes, 'id'> {}
@@ -402,7 +402,7 @@ export interface BlogPostAttributes {
   authorId: string;
   tags?: string;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface BlogPostCreationAttributes extends Optional<BlogPostAttributes, 'id'> {}
@@ -434,7 +434,7 @@ export interface SeoMetadataAttributes {
   headerScripts?: string;
   footerScripts?: string;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface SeoMetadataCreationAttributes extends Optional<SeoMetadataAttributes, 'id'> {}
@@ -481,7 +481,7 @@ export interface ReviewAttributes {
   content: string;
   isActive?: boolean;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface ReviewCreationAttributes extends Optional<ReviewAttributes, 'id'> {}
@@ -508,7 +508,7 @@ export interface CouponAttributes {
   validUntil?: Date;
   isActive?: boolean;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface CouponCreationAttributes extends Optional<CouponAttributes, 'id'> {}
@@ -534,7 +534,7 @@ export interface CourseAttributes {
   coverImage?: string;
   isPublished?: boolean;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface CourseCreationAttributes extends Optional<CourseAttributes, 'id'> {}
@@ -555,7 +555,7 @@ export interface ChapterAttributes {
   title: string;
   order: number;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface ChapterCreationAttributes extends Optional<ChapterAttributes, 'id'> {}
@@ -579,7 +579,7 @@ export interface LessonAttributes {
   isPublished?: boolean;
   duration?: number;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface LessonCreationAttributes extends Optional<LessonAttributes, 'id'> {}
@@ -603,7 +603,7 @@ export interface LessonProgressAttributes {
   lessonId: string;
   isCompleted?: boolean;
   createdAt?: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface LessonProgressCreationAttributes extends Optional<LessonProgressAttributes, 'id'> {}
@@ -1586,5 +1586,38 @@ User.hasMany(LiveClass, { as: 'taughtClasses', foreignKey: 'tutorId' });
 Order.belongsTo(User, { as: 'student', foreignKey: 'studentId' });
 User.hasMany(Order, { as: 'orders', foreignKey: 'studentId' });
 
-Order.belongsTo(PricingPackage, { as: 'package', foreignKey: 'membershipId' });
-PricingPackage.hasMany(Order, { as: 'orders', foreignKey: 'membershipId' });
+Order.belongsTo(PricingPackage, { as: 'package', foreignKey: 'membershipId', constraints: false });
+PricingPackage.hasMany(Order, { as: 'orders', foreignKey: 'membershipId', constraints: false });
+
+Order.belongsTo(Membership, { as: 'membership', foreignKey: 'membershipId', constraints: false });
+Membership.hasMany(Order, { as: 'orders', foreignKey: 'membershipId', constraints: false });
+
+Order.hasOne(Payment, { as: 'payment', foreignKey: 'orderId' });
+Payment.belongsTo(Order, { as: 'order', foreignKey: 'orderId' });
+
+Order.belongsTo(Coupon, { as: 'coupon', foreignKey: 'couponId' });
+Coupon.hasMany(Order, { as: 'orders', foreignKey: 'couponId' });
+
+Membership.belongsTo(User, { as: 'student', foreignKey: 'studentId' });
+User.hasMany(Membership, { as: 'memberships', foreignKey: 'studentId' });
+
+
+BlogPost.belongsTo(User, { as: 'author', foreignKey: 'authorId' });
+User.hasMany(BlogPost, { as: 'blogPosts', foreignKey: 'authorId' });
+
+Review.belongsTo(User, { as: 'tutor', foreignKey: 'tutorId' });
+Review.belongsTo(User, { as: 'student', foreignKey: 'studentId' });
+User.hasMany(Review, { as: 'receivedReviews', foreignKey: 'tutorId' });
+User.hasMany(Review, { as: 'givenReviews', foreignKey: 'studentId' });
+
+Chapter.belongsTo(Course, { as: 'course', foreignKey: 'courseId' });
+Course.hasMany(Chapter, { as: 'chapters', foreignKey: 'courseId' });
+
+Lesson.belongsTo(Chapter, { as: 'chapter', foreignKey: 'chapterId' });
+Chapter.hasMany(Lesson, { as: 'lessons', foreignKey: 'chapterId' });
+
+LessonProgress.belongsTo(User, { as: 'student', foreignKey: 'studentId' });
+LessonProgress.belongsTo(Lesson, { as: 'lesson', foreignKey: 'lessonId' });
+User.hasMany(LessonProgress, { as: 'lessonProgress', foreignKey: 'studentId' });
+Lesson.hasMany(LessonProgress, { as: 'progressRecords', foreignKey: 'lessonId' });
+

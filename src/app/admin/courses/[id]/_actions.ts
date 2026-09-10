@@ -1,41 +1,46 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import { Course, Chapter, Lesson } from "@/models";
 import { revalidatePath } from "next/cache";
 
 export async function updateCourseDetails(
   courseId: string, 
   data: { title: string; description: string; isPublished: boolean; coverImage?: string }
 ) {
-  await prisma.course.update({
-    where: { id: courseId },
-    data
+  await Course.update(data, {
+    where: { id: courseId }
   });
   revalidatePath(`/admin/courses/${courseId}`);
   revalidatePath('/admin/courses');
 }
 
 export async function createChapter(courseId: string, title: string, order: number) {
-  await prisma.chapter.create({
-    data: {
-      courseId,
-      title,
-      order
-    }
+  await Chapter.create({
+    courseId,
+    title,
+    order
   });
   revalidatePath(`/admin/courses/${courseId}`);
 }
 
 export async function updateChapter(chapterId: string, title: string, courseId: string) {
-  await prisma.chapter.update({
-    where: { id: chapterId },
-    data: { title }
-  });
+  await Chapter.update(
+    { title },
+    { where: { id: chapterId } }
+  );
   revalidatePath(`/admin/courses/${courseId}`);
 }
 
 export async function deleteChapter(chapterId: string, courseId: string) {
-  await prisma.chapter.delete({
+  const lessons = await Lesson.findAll({ where: { chapterId }, attributes: ['id'] });
+  const lessonIds = lessons.map((l: any) => l.id);
+  if (lessonIds.length > 0) {
+    const { LessonProgress } = await import("@/models");
+    const { Op } = await import("sequelize");
+    await LessonProgress.destroy({ where: { lessonId: { [Op.in]: lessonIds } } });
+    await Lesson.destroy({ where: { id: { [Op.in]: lessonIds } } });
+  }
+  await Chapter.destroy({
     where: { id: chapterId }
   });
   revalidatePath(`/admin/courses/${courseId}`);
@@ -46,12 +51,10 @@ export async function createLesson(
   courseId: string, 
   data: { title: string; videoUrl?: string; order: number; duration: number }
 ) {
-  await prisma.lesson.create({
-    data: {
-      chapterId,
-      ...data,
-      isPublished: true // Default to published when created from Admin panel
-    }
+  await Lesson.create({
+    chapterId,
+    ...data,
+    isPublished: true // Default to published when created from Admin panel
   });
   revalidatePath(`/admin/courses/${courseId}`);
 }
@@ -61,16 +64,19 @@ export async function updateLesson(
   courseId: string,
   data: { title: string; videoUrl?: string; duration: number; isPublished: boolean }
 ) {
-  await prisma.lesson.update({
-    where: { id: lessonId },
-    data
+  await Lesson.update(data, {
+    where: { id: lessonId }
   });
   revalidatePath(`/admin/courses/${courseId}`);
 }
 
 export async function deleteLesson(lessonId: string, courseId: string) {
-  await prisma.lesson.delete({
+  const { LessonProgress } = await import("@/models");
+  await LessonProgress.destroy({ where: { lessonId } });
+  await Lesson.destroy({
     where: { id: lessonId }
   });
   revalidatePath(`/admin/courses/${courseId}`);
 }
+
+

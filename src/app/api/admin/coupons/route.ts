@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { Coupon } from '@/models';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
@@ -15,19 +15,17 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const [coupons, total] = await Promise.all([
-      prisma.coupon.findMany({
-        orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-      }),
-      prisma.coupon.count()
-    ]);
+    const { rows: coupons, count: total } = await Coupon.findAndCountAll({
+      order: [['createdAt', 'DESC']],
+      offset: (page - 1) * pageSize,
+      limit: pageSize,
+    });
 
     return NextResponse.json({
       coupons,
       totalPages: Math.ceil(total / pageSize)
     });
+
   } catch (error) {
     console.error('Error fetching coupons:', error);
     return NextResponse.json({ error: 'Failed to fetch coupons' }, { status: 500 });

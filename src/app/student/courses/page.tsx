@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { Membership, Course, Chapter } from "@/models";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -10,7 +10,7 @@ export default async function StudentCoursesPage() {
   if (!session || session.user.role !== "STUDENT") redirect("/login");
 
   // Check if they have an active membership
-  const activeMemberships = await prisma.membership.findMany({
+  const activeMemberships = await Membership.findAll({
     where: { studentId: session.user.id, status: 'ACTIVE' },
   });
 
@@ -29,12 +29,22 @@ export default async function StudentCoursesPage() {
     );
   }
 
-  const courses = await prisma.course.findMany({
+  const rawCourses = await Course.findAll({
     where: { isPublished: true },
-    include: {
-      _count: { select: { chapters: true } }
-    }
+    include: [{
+      model: Chapter,
+      as: 'chapters',
+      attributes: ['id']
+    }]
   });
+
+  const courses = rawCourses.map((c: any) => ({
+    ...c.toJSON(),
+    _count: {
+      chapters: c.chapters ? c.chapters.length : 0
+    }
+  }));
+
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">

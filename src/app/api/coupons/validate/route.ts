@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { Coupon } from "@/models";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 
@@ -16,9 +16,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Coupon code is required" }, { status: 400 });
     }
 
-    const coupon = await prisma.coupon.findUnique({
+    const coupon = await Coupon.findOne({
       where: { code: code.toUpperCase() },
     });
+
 
     if (!coupon) {
       return NextResponse.json({ error: "Invalid coupon code" }, { status: 404 });

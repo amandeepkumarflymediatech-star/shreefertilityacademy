@@ -1,4 +1,5 @@
-import { prisma } from "@/lib/db";
+import { Course, Chapter, Lesson, LessonProgress } from "@/models";
+import { Op } from "sequelize";
 import Link from "next/link";
 import { Plus, Edit, Trash2, Eye, Video } from "lucide-react";
 import { revalidatePath } from "next/cache";
@@ -7,19 +8,42 @@ import DeleteCourseButton from "./_components/DeleteCourseButton";
 async function deleteCourse(formData: FormData) {
   "use server";
   const id = formData.get("id") as string;
-  await prisma.course.delete({ where: { id } });
+  
+  const chapters = await Chapter.findAll({ where: { courseId: id }, attributes: ['id'] });
+  const chapterIds = chapters.map((c: any) => c.id);
+  
+  if (chapterIds.length > 0) {
+    const lessons = await Lesson.findAll({ where: { chapterId: { [Op.in]: chapterIds } }, attributes: ['id'] });
+    const lessonIds = lessons.map((l: any) => l.id);
+    if (lessonIds.length > 0) {
+      await LessonProgress.destroy({ where: { lessonId: { [Op.in]: lessonIds } } });
+      await Lesson.destroy({ where: { id: { [Op.in]: lessonIds } } });
+    }
+    await Chapter.destroy({ where: { id: { [Op.in]: chapterIds } } });
+  }
+
+  await Course.destroy({ where: { id } });
   revalidatePath("/admin/courses");
 }
 
+
 export default async function AdminCoursesPage() {
-  const courses = await prisma.course.findMany({
-    include: {
-      _count: {
-        select: { chapters: true }
-      }
-    },
-    orderBy: { createdAt: "desc" }
+  const rawCourses = await Course.findAll({
+    include: [{
+      model: Chapter,
+      as: 'chapters',
+      attributes: ['id']
+    }],
+    order: [['createdAt', 'DESC']]
   });
+
+  const courses = rawCourses.map((c: any) => ({
+    ...c.toJSON(),
+    _count: {
+      chapters: c.chapters ? c.chapters.length : 0
+    }
+  }));
+
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">

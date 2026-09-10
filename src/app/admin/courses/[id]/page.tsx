@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { Course, Chapter, Lesson } from "@/models";
 import { notFound } from "next/navigation";
 import CourseEditorClient from "./CourseEditorClient";
 import Link from "next/link";
@@ -6,23 +6,27 @@ import { ArrowLeft } from "lucide-react";
 
 export default async function CourseEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const course = await prisma.course.findUnique({
-    where: { id },
-    include: {
-      chapters: {
-        orderBy: { order: 'asc' },
-        include: {
-          lessons: {
-            orderBy: { order: 'asc' }
-          }
-        }
-      }
-    }
+  const rawCourse = await Course.findByPk(id, {
+    include: [{
+      model: Chapter,
+      as: 'chapters',
+      include: [{
+        model: Lesson,
+        as: 'lessons',
+      }]
+    }],
+    order: [
+      [{ model: Chapter, as: 'chapters' }, 'order', 'ASC'],
+      [{ model: Chapter, as: 'chapters' }, { model: Lesson, as: 'lessons' }, 'order', 'ASC']
+    ]
   });
 
-  if (!course) {
+  if (!rawCourse) {
     notFound();
   }
+
+  const course = JSON.parse(JSON.stringify(rawCourse));
+
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">

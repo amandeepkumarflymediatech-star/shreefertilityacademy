@@ -1,6 +1,7 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import { LiveClass, Membership, ClassEnrollment, User } from "@/models";
+import { Op, Sequelize } from "sequelize";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
@@ -23,49 +24,43 @@ export async function createLiveClass(formData: FormData) {
   }
 
   // 1. Create LiveClass
-  const liveClass = await prisma.liveClass.create({
-    data: {
-      tutorId: session.user.id,
-      title,
-      description,
-      scheduledAt,
-      meetingUrl,
-      status: "SCHEDULED"
-    }
+  const liveClass = await LiveClass.create({
+    tutorId: session.user.id,
+    title,
+    description: description || undefined,
+    scheduledAt,
+    meetingUrl: meetingUrl || undefined,
+    status: "SCHEDULED"
   });
 
   // 2. Fetch all ACTIVE Memberships that still have classes left
-  const activeMemberships = await prisma.membership.findMany({
+  const activeMemberships = await Membership.findAll({
     where: { 
       status: "ACTIVE",
-      usedClasses: { lt: prisma.membership.fields.maxClasses }
+      usedClasses: { [Op.lt]: Sequelize.col('maxClasses') }
     },
-    include: {
-      student: true
-    }
+    include: [{
+      model: User,
+      as: 'student'
+    }]
   });
 
   // 3. Enroll students and update their membership
   if (activeMemberships.length > 0) {
-    const enrollments = activeMemberships.map(m => ({
+    const enrollments = activeMemberships.map((m: any) => ({
       sessionId: liveClass.id,
       studentId: m.studentId,
       status: "REGISTERED"
     }));
 
-    await prisma.classEnrollment.createMany({
-      data: enrollments
-    });
+    await ClassEnrollment.bulkCreate(enrollments);
 
     // Update usedClasses
-    for (const membership of activeMemberships) {
-      const updatedUsedClasses = membership.usedClasses + 1;
-      await prisma.membership.update({
-        where: { id: membership.id },
-        data: {
-          usedClasses: updatedUsedClasses,
-          status: updatedUsedClasses >= membership.maxClasses ? "EXPIRED" : "ACTIVE"
-        }
+    for (const membership of activeMemberships as any[]) {
+      const updatedUsedClasses = (membership.usedClasses || 0) + 1;
+      await membership.update({
+        usedClasses: updatedUsedClasses,
+        status: updatedUsedClasses >= membership.maxClasses ? "EXPIRED" : "ACTIVE"
       });
     }
 
@@ -79,7 +74,7 @@ export async function createLiveClass(formData: FormData) {
       },
     });
 
-    const emails = activeMemberships.map(m => m.student.email).filter(e => e);
+    const emails = activeMemberships.map((m: any) => m.student?.email).filter(Boolean);
 
     if (emails.length > 0) {
       const mailOptions = {
@@ -115,3 +110,4 @@ export async function createLiveClass(formData: FormData) {
   revalidatePath("/tutor/classes");
   revalidatePath("/student");
 }
+
