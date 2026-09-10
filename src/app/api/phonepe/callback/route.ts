@@ -7,6 +7,7 @@ import {
 } from "@/lib/phonepe";
 
 export async function POST(req: NextRequest) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   try {
     const formData = await req.formData();
     const transactionId = (formData.get("transactionId") as string) || (formData.get("merchantTransactionId") as string);
@@ -16,13 +17,13 @@ export async function POST(req: NextRequest) {
     const orderId = url.searchParams.get("orderId");
 
     if (!orderId) {
-      return NextResponse.redirect(new URL("/student?payment=failed", req.url));
+      return NextResponse.redirect(`${appUrl}/student?payment=failed`, 303);
     }
 
     const order = await Order.findByPk(orderId);
 
     if (!order || order.status === "PAID") {
-      return NextResponse.redirect(new URL(`/invoice/${orderId}`, req.url), 303);
+      return NextResponse.redirect(`${appUrl}/invoice/${orderId}`, 303);
     }
 
     const merchantTransactionId = `MT${order.id.replace(/-/g, '').substring(0, 30)}`;
@@ -130,16 +131,16 @@ export async function POST(req: NextRequest) {
         phonepeTransactionId: phonepeTxnId,
       } as any);
 
-      return NextResponse.redirect(new URL(`/invoice/${orderId}`, req.url), 303);
+      return NextResponse.redirect(`${appUrl}/invoice/${orderId}`, 303);
     } else {
       // Payment Failed
       await order.update({ status: "FAILED" });
-      return NextResponse.redirect(new URL("/student?payment=failed", req.url), 303);
+      return NextResponse.redirect(`${appUrl}/student?payment=failed`, 303);
     }
 
   } catch (error) {
     console.error("PhonePe callback error:", error);
-    return NextResponse.redirect(new URL("/student?payment=error", req.url));
+    return NextResponse.redirect(`${appUrl}/student?payment=error`, 303);
   }
 }
 
