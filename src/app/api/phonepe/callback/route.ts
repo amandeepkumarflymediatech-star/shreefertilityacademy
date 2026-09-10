@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Order, Membership, Payment, PricingPackage } from "@/models";
+import { Order, Membership, Payment, PricingPackage, Coupon } from "@/models";
 import { getPhonePeOrderStatus } from "@/lib/phonepe";
 
 async function processCallback(req: NextRequest) {
@@ -129,7 +129,6 @@ async function processCallback(req: NextRequest) {
       // Update Order to PAID
       await order.update({
         status: "PAID",
-        membershipId: membership.id
       });
 
       // Create Payment record
@@ -142,6 +141,18 @@ async function processCallback(req: NextRequest) {
         merchantTransactionId: merchantOrderId,
         phonepeTransactionId: phonepeTxnId,
       } as any);
+
+      // Increment coupon usage count if applied
+      if (order.couponId) {
+        try {
+          const appliedCoupon = await Coupon.findByPk(order.couponId);
+          if (appliedCoupon) {
+            await appliedCoupon.increment('usedCount');
+          }
+        } catch (couponErr) {
+          console.error("Failed to increment coupon usedCount:", couponErr);
+        }
+      }
 
       return NextResponse.redirect(`${appUrl}/invoice/${order.id}`, 303);
     } else if (isPending) {

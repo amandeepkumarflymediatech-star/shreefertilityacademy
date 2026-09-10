@@ -44,9 +44,9 @@ export default function Contact() {
   return (
     <main className="min-h-screen bg-white">
       {/* Header Section */}
-      <section className="bg-primary text-white pt-32 pb-20 px-6">
+      <section className="text-white pt-32 pb-20 px-6">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-playfair font-bold mb-6">Get in Touch</h1>
+          <h1 className="text-4xl md:text-6xl font-playfair font-bold mb-6 text-black">Get in Touch</h1>
           <p className="text-secondary/90 text-lg md:text-xl font-sans max-w-2xl mx-auto">
             Have questions about our Reproductive Medicine & IVF Fellowship programs? We're here to help. Reach out to our academic team today.
           </p>

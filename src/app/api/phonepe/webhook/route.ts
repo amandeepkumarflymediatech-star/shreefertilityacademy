@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Order, Membership, Payment, PricingPackage } from "@/models";
+import { Order, Membership, Payment, PricingPackage, Coupon } from "@/models";
 import { getPhonePeOrderStatus } from "@/lib/phonepe";
 
 export async function POST(req: NextRequest) {
@@ -91,7 +91,6 @@ export async function POST(req: NextRequest) {
       // Update Order
       await order.update({
         status: "PAID",
-        membershipId: membership.id,
       });
 
       // Create Payment
@@ -104,6 +103,18 @@ export async function POST(req: NextRequest) {
         merchantTransactionId: merchantOrderId,
         phonepeTransactionId: phonepeTxnId,
       } as any);
+
+      // Increment coupon usage count if applied
+      if (order.couponId) {
+        try {
+          const appliedCoupon = await Coupon.findByPk(order.couponId);
+          if (appliedCoupon) {
+            await appliedCoupon.increment('usedCount');
+          }
+        } catch (couponErr) {
+          console.error("Webhook coupon increment error:", couponErr);
+        }
+      }
     }
 
     return NextResponse.json({ success: true });

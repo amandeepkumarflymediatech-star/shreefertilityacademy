@@ -49,7 +49,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
     );
   }
 
-  let basePrice = 60000; // Fixed package price as per requirements
+  const basePrice = order.package?.price || 60000;
   let discountAmount = 0;
   
   if (order.coupon) {

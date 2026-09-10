@@ -37,7 +37,7 @@ export default function ProfileForm({ user }: { user: any }) {
         await updateProfile(formData);
         await update();
         toast.success("Profile updated successfully!");
-        router.push("/student");
+        router.refresh();
       } catch (error: any) {
         toast.error(error.message || "Failed to update profile");
       }

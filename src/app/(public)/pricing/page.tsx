@@ -1,20 +1,22 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { CheckCircle2, Clock, ShieldCheck, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Clock, ShieldCheck, ArrowRight, Tag } from 'lucide-react';
 import Link from 'next/link';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
+import CheckoutModal from '@/components/pricing/CheckoutModal';
 
 gsap.registerPlugin(useGSAP);
 
 export default function PricingPage() {
   const { data: session } = useSession();
-  const [isProcessing, setIsProcessing] = useState(false);
   const [packages, setPackages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedPackage, setSelectedPackage] = useState<any | null>(null);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,25 +55,9 @@ export default function PricingPage() {
     );
   }, { scope: container, dependencies: [isLoading, packages.length] });
 
-  const handleEnroll = async (amount: number, packageId: string) => {
-    setIsProcessing(true);
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, packageId })
-      });
-      const data = await res.json();
-      if (data.redirectUrl) {
-        window.location.href = data.redirectUrl;
-      } else {
-        toast.error(data.error || 'Payment initiation failed');
-        setIsProcessing(false);
-      }
-    } catch (err) {
-      toast.error('An error occurred. Please try again.');
-      setIsProcessing(false);
-    }
+  const handleOpenCheckout = (pkg: any) => {
+    setSelectedPackage(pkg);
+    setIsCheckoutModalOpen(true);
   };
 
   const formatDate = (dateString: string) => {
@@ -178,20 +164,13 @@ export default function PricingPage() {
                       )}
 
                       <div className="mt-auto pt-4">
-                        {session ? (
-                          <button
-                            onClick={() => handleEnroll(pkg.price, pkg.id)}
-                            disabled={isProcessing}
-                            className="flex items-center justify-center gap-2 w-full py-4 bg-accent hover:bg-primary text-white font-bold text-sm uppercase tracking-widest rounded-2xl transition-all duration-300 disabled:opacity-50 group"
-                          >
-                            {isProcessing ? "Processing..." : "Enroll "}
-                            {/* {!isProcessing && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />} */}
-                          </button>
-                        ) : (
-                          <Link href="/student/signup" className="flex items-center justify-center gap-2 w-full py-4 bg-secondary/10 hover:bg-accent hover:text-white text-primary font-bold text-sm uppercase tracking-widest rounded-2xl transition-all duration-300 group">
-                            Reserve Your Place <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                          </Link>
-                        )}
+                        <button
+                          onClick={() => handleOpenCheckout(pkg)}
+                          className="flex items-center justify-center gap-2 w-full py-4 bg-accent hover:bg-primary text-white font-bold text-sm uppercase tracking-widest rounded-2xl transition-all duration-300 shadow-lg hover:shadow-accent/20 hover:-translate-y-0.5 cursor-pointer group"
+                        >
+                          Enroll Now
+                          <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -202,6 +181,13 @@ export default function PricingPage() {
 
         </div>
       </div>
+
+      {/* Interactive Checkout & Coupon Modal */}
+      <CheckoutModal
+        isOpen={isCheckoutModalOpen}
+        onClose={() => setIsCheckoutModalOpen(false)}
+        pkg={selectedPackage}
+      />
     </div>
   );
 }

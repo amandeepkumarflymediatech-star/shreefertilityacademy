@@ -4,6 +4,9 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import ProfileForm from "./_components/ProfileForm";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function StudentProfilePage() {
   const session = await getServerSession(authOptions);
   
@@ -11,10 +14,8 @@ export default async function StudentProfilePage() {
     redirect("/login");
   }
 
-  const user = await User.findOne({
-    where: { id: session.user.id },
-    raw: true
-  });
+  const rawUser = await User.findByPk(session.user.id);
+  const user = rawUser ? JSON.parse(JSON.stringify(rawUser)) : null;
 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans max-w-5xl mx-auto">
