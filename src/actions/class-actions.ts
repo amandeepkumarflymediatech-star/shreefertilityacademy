@@ -228,3 +228,37 @@ export async function deleteLiveClass(id: string) {
   revalidatePath("/student");
 }
 
+export async function recordClassAttendance(sessionId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.id) {
+    throw new Error("Unauthorized");
+  }
+
+  const studentId = session.user.id;
+
+  const enrollment = await ClassEnrollment.findOne({
+    where: { sessionId, studentId },
+  });
+
+  if (enrollment) {
+    if (enrollment.status !== "ATTENDED") {
+      await enrollment.update({ status: "ATTENDED" });
+    }
+  } else {
+    await ClassEnrollment.create({
+      sessionId,
+      studentId,
+      status: "ATTENDED",
+    });
+  }
+
+  revalidatePath("/student/classes");
+  revalidatePath("/student");
+  revalidatePath("/tutor/classes");
+  revalidatePath("/tutor/students");
+  revalidatePath("/tutor");
+
+  return { success: true };
+}
+
+

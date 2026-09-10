@@ -976,10 +976,17 @@ export default function TutorClassesClient({ classes }: { classes: LiveClassItem
                                       {pendingCreds} Credits Left
                                     </span>
                                   )}
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                                    <CheckCircle2 size={10} />
-                                    Enrolled
-                                  </span>
+                                  {enr.status === "ATTENDED" ? (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 rounded-full shadow-xs">
+                                      <CheckCircle2 size={11} className="text-emerald-600" />
+                                      Attended Live
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
+                                      <Clock size={11} className="text-blue-600" />
+                                      Registered
+                                    </span>
+                                  )}
                                 </div>
                                 {enrolledDate && (
                                   <p className="text-[10px] text-primary/40">

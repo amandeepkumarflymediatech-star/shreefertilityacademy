@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatClassTime, formatClassDate, formatClassDateTime } from "@/lib/date-utils";
+import { recordClassAttendance } from "@/actions/class-actions";
 
 export type TutorUser = {
   id: string;
@@ -93,6 +94,16 @@ export default function StudentClassesClient({
     setCopiedId(id);
     toast.success("Meeting URL copied to clipboard!");
     setTimeout(() => setCopiedId(null), 2500);
+  };
+
+  const handleJoinClass = async (cls: StudentLiveClassItem) => {
+    if (!cls.meetingUrl) return;
+    try {
+      recordClassAttendance(cls.id);
+    } catch (e) {
+      console.error("Attendance recording failed:", e);
+    }
+    window.open(cls.meetingUrl, "_blank", "noopener,noreferrer");
   };
 
   // Group classes
@@ -425,16 +436,15 @@ export default function StudentClassesClient({
                       {hasClassCredits || cls.isEnrolled ? (
                         cls.meetingUrl ? (
                           <div className="flex items-center gap-2">
-                            <a
-                              href={cls.meetingUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="flex-1 py-3 bg-primary hover:bg-accent text-white font-bold uppercase tracking-wider text-xs rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
+                            <button
+                              type="button"
+                              onClick={() => handleJoinClass(cls)}
+                              className="flex-1 py-3 bg-primary hover:bg-accent text-white font-bold uppercase tracking-wider text-xs rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md cursor-pointer"
                             >
                               <Video size={16} />
                               Join Live Class
                               <ExternalLink size={13} />
-                            </a>
+                            </button>
                             <button
                               type="button"
                               onClick={() => handleCopyMeetingLink(cls.meetingUrl!, cls.id)}
@@ -642,14 +652,13 @@ export default function StudentClassesClient({
                                 </span>
                                 {item.meetingUrl && (
                                   hasClassCredits || item.isEnrolled ? (
-                                    <a
-                                      href={item.meetingUrl}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="text-accent hover:underline font-bold flex items-center gap-0.5"
+                                    <button
+                                      type="button"
+                                      onClick={() => handleJoinClass(item)}
+                                      className="text-accent hover:underline font-bold flex items-center gap-0.5 cursor-pointer"
                                     >
                                       Join <ExternalLink size={10} />
-                                    </a>
+                                    </button>
                                   ) : (
                                     <Link
                                       href="/pricing"
@@ -784,14 +793,13 @@ export default function StudentClassesClient({
                             </span>
                             {cls.meetingUrl && isUpcoming && (
                               hasClassCredits || cls.isEnrolled ? (
-                                <a
-                                  href={cls.meetingUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-accent hover:underline font-bold flex items-center gap-0.5"
+                                <button
+                                  type="button"
+                                  onClick={() => handleJoinClass(cls)}
+                                  className="text-accent hover:underline font-bold flex items-center gap-0.5 cursor-pointer"
                                 >
                                   Join <ExternalLink size={9} />
-                                </a>
+                                </button>
                               ) : (
                                 <Link
                                   href="/pricing"
