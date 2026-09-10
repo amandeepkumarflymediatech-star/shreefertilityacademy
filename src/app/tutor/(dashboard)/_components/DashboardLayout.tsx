@@ -13,8 +13,9 @@ export default function DashboardLayout({ children, user }: { children: React.Re
 
   const navItems = [
     { name: 'Dashboard', href: '/tutor', icon: LayoutDashboard },
+    { name: 'Live Classes', href: '/tutor/classes', icon: Video },
     { name: 'My Students', href: '/tutor/students', icon: Users },
-    { name: 'Mentors', href: '/tutor/allTutors', icon: Users },
+    // { name: 'Mentors', href: '/tutor/allTutors', icon: Users },
     { name: 'Profile', href: '/tutor/profile', icon: User },
     { name: 'Settings', href: '/tutor/settings', icon: Settings },
   ];

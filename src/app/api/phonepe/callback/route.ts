@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Order, Membership, Payment } from "@/models";
+import { Order, Membership, Payment, PricingPackage } from "@/models";
 import { 
   PHONEPE_MERCHANT_ID, 
   PHONEPE_BASE_URL, 
@@ -64,12 +64,52 @@ export async function POST(req: NextRequest) {
     }
 
     if (isSuccess || code === "PAYMENT_SUCCESS") {
-      // Create Membership for 1 Year with 12 Classes
+      // 1. Determine package class quota
+      let packageClasses = 12; // default
+      if (order.membershipId) {
+        const pkg = await PricingPackage.findByPk(order.membershipId);
+        if (pkg?.features) {
+          try {
+            const feats = typeof pkg.features === 'string' ? JSON.parse(pkg.features) : pkg.features;
+            if (Array.isArray(feats)) {
+              for (const f of feats) {
+                const m = f.match(/(\d+)\s*(?:Live|Interactive|Classes|Sessions|Masterclasses|Webinars)/i);
+                if (m) {
+                  packageClasses = parseInt(m[1], 10);
+                  break;
+                }
+              }
+            }
+          } catch (e) {
+            console.error("Error parsing package features for class count:", e);
+          }
+        }
+      }
+
+      // 2. Carry over remaining unused classes from existing active memberships
+      const existingActiveMemberships = await Membership.findAll({
+        where: {
+          studentId: order.studentId,
+          status: "ACTIVE",
+        },
+      });
+
+      let leftoverClasses = 0;
+      for (const mem of existingActiveMemberships as any[]) {
+        const rem = Math.max(0, (mem.maxClasses || 0) - (mem.usedClasses || 0));
+        leftoverClasses += rem;
+        await mem.update({ status: "RENEWED" });
+      }
+
+      const totalClasses = packageClasses + leftoverClasses;
+      const validUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year validity
+
+      // 3. Create fresh Active Membership with combined classes
       const membership = await Membership.create({
         studentId: order.studentId,
-        maxClasses: 12,
+        maxClasses: totalClasses,
         usedClasses: 0,
-        validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year validity
+        validUntil: validUntil,
         status: "ACTIVE"
       } as any);
 

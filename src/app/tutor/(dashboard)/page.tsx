@@ -155,7 +155,7 @@ export default async function TutorDashboard() {
           <div className="bg-white border border-secondary/30 rounded-3xl p-8 shadow-sm">
             <h3 className="text-xl font-black text-primary font-playfair tracking-tight mb-6">Quick Actions</h3>
             <div className="grid grid-cols-2 gap-4">
-              <Link href="/tutor/classes/new" className="flex flex-col items-center justify-center p-6 bg-secondary/5 hover:bg-primary hover:text-white text-primary rounded-2xl transition-all group shadow-sm hover:-translate-y-1">
+              <Link href="/tutor/classes" className="flex flex-col items-center justify-center p-6 bg-secondary/5 hover:bg-primary hover:text-white text-primary rounded-2xl transition-all group shadow-sm hover:-translate-y-1">
                 <Video size={28} className="mb-3 text-accent group-hover:text-white transition-colors" />
                 <span className="font-bold text-sm text-center">Schedule Class</span>
               </Link>

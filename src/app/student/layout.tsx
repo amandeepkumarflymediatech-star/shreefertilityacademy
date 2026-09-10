@@ -14,9 +14,10 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
 
   const navItems = [
     { name: 'Dashboard', href: '/student', icon: LayoutDashboard },
+    { name: 'Live Classes', href: '/student/classes', icon: Video },
     { name: 'My Courses', href: '/student/courses', icon: BookOpen },
+    { name: 'Mentors & Faculty', href: '/student/allTutors', icon: Users },
     { name: 'Purchase History', href: '/student/purchases', icon: Receipt },
-    { name: 'Mentors', href: '/student/allTutors', icon: Users },
     { name: 'Profile', href: '/student/profile', icon: UserIcon },
     { name: 'Settings', href: '/student/settings', icon: Settings },
   ];

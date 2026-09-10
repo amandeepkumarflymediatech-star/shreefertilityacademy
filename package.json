@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "setup:db": "npx tsx -r dotenv/config src/lib/schema.ts",
+    "seed:data": "npx tsx -r dotenv/config scripts/seed-dummy-data.ts",
     "worker": "npx tsx src/worker/cron.ts"
   },
   "dependencies": {

@@ -55,7 +55,7 @@ export default async function AllTutorsPage({ searchParams }: { searchParams: Pr
             <div className="flex items-start gap-4 mb-4">
               <div className="w-16 h-16 rounded-xl bg-secondary/50 overflow-hidden relative flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300">
                 {tutor.image ? (
-                  <Image src={tutor.image} alt={tutor.name || 'Tutor'} fill className="object-cover" />
+                  <Image src={tutor.image} alt={tutor.name || 'Tutor'} fill unoptimized className="object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-primary text-white text-xl font-black font-playfair uppercase">
                     {tutor.name?.charAt(0) || 'T'}

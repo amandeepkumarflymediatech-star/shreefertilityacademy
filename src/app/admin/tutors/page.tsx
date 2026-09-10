@@ -13,7 +13,13 @@ export default async function AdminTutorsPage() {
 
   const rawTutors = await User.findAll({
     where: { role: 'TUTOR' },
-    attributes: ['id', 'name', 'email', 'createdAt', 'isApproved', 'experience', 'bio', 'qualifications'],
+    attributes: [
+      'id', 'name', 'email', 'image', 'phone', 'timezone', 
+      'role', 'isActive', 'isApproved', 'onboardingStatus', 
+      'bio', 'experience', 'qualifications', 'languages', 
+      'teachingHeadline', 'teachingLevels', 'teachingAges', 
+      'teachingStyle', 'createdAt', 'updatedAt'
+    ],
     order: [['createdAt', 'DESC']]
   });
 

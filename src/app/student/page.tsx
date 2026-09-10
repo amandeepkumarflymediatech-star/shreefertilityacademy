@@ -17,29 +17,35 @@ export default async function StudentDashboard() {
   const upcomingEnrollments = await ClassEnrollment.findAll({
     where: { 
       studentId: session.user.id, 
-      status: 'REGISTERED',
+      status: { [Op.notIn]: ['CANCELLED'] },
     },
     include: [{ 
       model: LiveClass,
       as: 'session',
       where: {
-        scheduledAt: { [Op.gte]: new Date() }
+        scheduledAt: { [Op.gte]: new Date() },
+        status: { [Op.notIn]: ['CANCELLED'] },
       },
       include: [{ model: User, as: 'tutor' }]
     }],
     order: [[{ model: LiveClass, as: 'session' }, 'scheduledAt', 'ASC']],
-    limit: 3
+    limit: 4
   });
 
-  // Fetch past attended classes
+  // Fetch past attended / completed classes
   const pastEnrollments = await ClassEnrollment.findAll({
     where: { 
       studentId: session.user.id, 
-      status: 'ATTENDED' 
     },
     include: [{ 
       model: LiveClass,
       as: 'session',
+      where: {
+        [Op.or]: [
+          { scheduledAt: { [Op.lt]: new Date() } },
+          { status: 'COMPLETED' },
+        ],
+      },
       include: [{ model: User, as: 'tutor' }]
     }],
     order: [[{ model: LiveClass, as: 'session' }, 'scheduledAt', 'DESC']],
@@ -57,25 +63,23 @@ export default async function StudentDashboard() {
     order: [['createdAt', 'DESC']]
   });
 
-  const completedCount = await ClassEnrollment.count({
-    where: { studentId: session.user.id, status: 'ATTENDED' }
-  });
+  const completedCount = pastEnrollments.length;
 
   const upcomingClasses = upcomingEnrollments.map((e: any) => ({
     id: e.session.id,
-    tutor: e.session.tutor.name || 'Mentor',
+    tutor: e.session.tutor?.name || 'Mentor',
     title: e.session.title,
     time: new Date(e.session.scheduledAt).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
-    initial: e.session.tutor.name ? e.session.tutor.name[0].toUpperCase() : 'M',
-    url: e.session.meetingUrl || '/student/live'
+    initial: e.session.tutor?.name ? e.session.tutor.name[0].toUpperCase() : 'M',
+    url: e.session.meetingUrl || '/student/classes'
   }));
 
   const pastClasses = pastEnrollments.map((e: any) => ({
     id: e.session.id,
-    tutor: e.session.tutor.name || 'Mentor',
+    tutor: e.session.tutor?.name || 'Mentor',
     title: e.session.title,
     time: new Date(e.session.scheduledAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-    initial: e.session.tutor.name ? e.session.tutor.name[0].toUpperCase() : 'M'
+    initial: e.session.tutor?.name ? e.session.tutor.name[0].toUpperCase() : 'M'
   }));
 
   const nextClass = upcomingClasses.length > 0 ? upcomingClasses[0] : null;

@@ -14,16 +14,61 @@ export async function createLiveClass(formData: FormData) {
     throw new Error("Unauthorized");
   }
 
-  const title = formData.get("title") as string;
-  const scheduledAt = new Date(formData.get("scheduledAt") as string);
-  const meetingUrl = formData.get("meetingUrl") as string;
-  const description = formData.get("description") as string;
+  const title = (formData.get("title") as string)?.trim();
+  const scheduledAtStr = formData.get("scheduledAt") as string;
+  const meetingUrl = (formData.get("meetingUrl") as string)?.trim() || null;
+  const description = (formData.get("description") as string)?.trim() || null;
 
-  if (!title || !scheduledAt) {
-    throw new Error("Missing required fields");
+  if (!title || !scheduledAtStr) {
+    throw new Error("Title and scheduled date/time are required.");
   }
 
-  // 1. Create LiveClass
+  const scheduledAt = new Date(scheduledAtStr);
+  if (isNaN(scheduledAt.getTime())) {
+    throw new Error("Invalid scheduled date and time.");
+  }
+
+  // 1. Prevent scheduling in the past (with 2-minute leeway)
+  const pastThreshold = new Date(Date.now() - 2 * 60 * 1000);
+  if (scheduledAt < pastThreshold) {
+    throw new Error("Cannot schedule a class in the past. Please select a future date and time.");
+  }
+
+  // 2. Strict Same-Day Validation: Tutor cannot schedule more than 1 class on the same calendar day
+  const startOfDay = new Date(scheduledAt);
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date(scheduledAt);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const existingConflict = await LiveClass.findOne({
+    where: {
+      tutorId: session.user.id,
+      status: { [Op.notIn]: ["CANCELLED"] },
+      scheduledAt: {
+        [Op.between]: [startOfDay, endOfDay],
+      },
+    },
+  });
+
+  if (existingConflict) {
+    const conflictTime = new Date(existingConflict.scheduledAt).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    const conflictDate = new Date(existingConflict.scheduledAt).toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    throw new Error(
+      `A class ("${existingConflict.title}") is already scheduled on ${conflictDate} at ${conflictTime}. You cannot schedule multiple classes on the same day.`
+    );
+  }
+
+  // 3. Create LiveClass
   const liveClass = await LiveClass.create({
     tutorId: session.user.id,
     title,
@@ -108,6 +153,104 @@ export async function createLiveClass(formData: FormData) {
   }
 
   revalidatePath("/tutor/classes");
+  revalidatePath("/tutor");
+  revalidatePath("/student");
+}
+
+export async function updateLiveClass(id: string, formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user.role !== "TUTOR" && session.user.role !== "ADMIN")) {
+    throw new Error("Unauthorized");
+  }
+
+  const title = (formData.get("title") as string)?.trim();
+  const scheduledAtStr = formData.get("scheduledAt") as string;
+  const meetingUrl = (formData.get("meetingUrl") as string)?.trim() || null;
+  const description = (formData.get("description") as string)?.trim() || null;
+  const recordingUrl = (formData.get("recordingUrl") as string)?.trim() || null;
+  const status = (formData.get("status") as string)?.trim() || "SCHEDULED";
+
+  if (!title) {
+    throw new Error("Title is required");
+  }
+
+  const data: any = {
+    title,
+    meetingUrl,
+    description,
+    recordingUrl,
+    status,
+  };
+
+  if (scheduledAtStr) {
+    const scheduledAt = new Date(scheduledAtStr);
+    if (isNaN(scheduledAt.getTime())) {
+      throw new Error("Invalid scheduled date and time.");
+    }
+
+    // Same-Day conflict check with other classes
+    const startOfDay = new Date(scheduledAt);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(scheduledAt);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const existingConflict = await LiveClass.findOne({
+      where: {
+        id: { [Op.ne]: id },
+        tutorId: session.user.id,
+        status: { [Op.notIn]: ["CANCELLED"] },
+        scheduledAt: {
+          [Op.between]: [startOfDay, endOfDay],
+        },
+      },
+    });
+
+    if (existingConflict) {
+      const conflictTime = new Date(existingConflict.scheduledAt).toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+      const conflictDate = new Date(existingConflict.scheduledAt).toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+      throw new Error(
+        `A class ("${existingConflict.title}") is already scheduled on ${conflictDate} at ${conflictTime}. You cannot schedule multiple classes on the same day.`
+      );
+    }
+
+    data.scheduledAt = scheduledAt;
+  }
+
+  await LiveClass.update(data, {
+    where: { id }
+  });
+
+  revalidatePath("/tutor/classes");
+  revalidatePath("/tutor");
+  revalidatePath("/student");
+}
+
+export async function deleteLiveClass(id: string) {
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user.role !== "TUTOR" && session.user.role !== "ADMIN")) {
+    throw new Error("Unauthorized");
+  }
+
+  await ClassEnrollment.destroy({
+    where: { sessionId: id }
+  });
+
+  await LiveClass.destroy({
+    where: { id }
+  });
+
+  revalidatePath("/tutor/classes");
+  revalidatePath("/tutor");
   revalidatePath("/student");
 }
 
