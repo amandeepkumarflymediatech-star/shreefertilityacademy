@@ -1,70 +1,78 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Order, Membership, Payment, PricingPackage } from "@/models";
-import { 
-  PHONEPE_MERCHANT_ID, 
-  PHONEPE_BASE_URL, 
-  generateChecksum 
-} from "@/lib/phonepe";
+import { getPhonePeOrderStatus } from "@/lib/phonepe";
 
-export async function POST(req: NextRequest) {
+async function processCallback(req: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   try {
-    const formData = await req.formData();
-    const transactionId = (formData.get("transactionId") as string) || (formData.get("merchantTransactionId") as string);
-    const code = formData.get("code") as string;
-    
     const url = new URL(req.url);
-    const orderId = url.searchParams.get("orderId");
+    let orderId = url.searchParams.get("orderId");
+
+    // Check in formData / json if not in searchParams
+    if (!orderId && req.method === "POST") {
+      try {
+        const contentType = req.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          const body = await req.json();
+          orderId = body.orderId || body.merchantOrderId;
+        } else if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
+          const formData = await req.formData();
+          orderId = (formData.get("orderId") as string) || (formData.get("merchantOrderId") as string);
+        }
+      } catch (e) {
+        // ignore parse error if body is empty or already consumed
+      }
+    }
 
     if (!orderId) {
       return NextResponse.redirect(`${appUrl}/student?payment=failed`, 303);
     }
 
-    const order = await Order.findByPk(orderId);
-
-    if (!order || order.status === "PAID") {
-      return NextResponse.redirect(`${appUrl}/invoice/${orderId}`, 303);
+    // In case orderId passed is merchantOrderId format e.g. MT...
+    let order = await Order.findByPk(orderId);
+    if (!order) {
+      // Try finding by merchantOrderId or stripped UUID
+      const allOrders = await Order.findAll({ where: { status: "PENDING" } });
+      order = allOrders.find(o => `MT${o.id.replace(/-/g, '').substring(0, 30)}` === orderId) || null;
     }
 
-    const merchantTransactionId = `MT${order.id.replace(/-/g, '').substring(0, 30)}`;
+    if (!order) {
+      return NextResponse.redirect(`${appUrl}/student?payment=failed`, 303);
+    }
 
-    // Call PhonePe status API to verify
-    const endpoint = `/pg/v1/status/${PHONEPE_MERCHANT_ID}/${merchantTransactionId}`;
-    const checksum = generateChecksum("", endpoint);
+    if (order.status === "PAID") {
+      return NextResponse.redirect(`${appUrl}/invoice/${order.id}`, 303);
+    }
 
+    const merchantOrderId = `MT${order.id.replace(/-/g, '').substring(0, 30)}`;
+
+    // Call PhonePe V2 status API to verify
     let isSuccess = false;
+    let isPending = false;
     let verifiedAmount = order.amount;
-    let phonepeTxnId = transactionId || 'N/A';
+    let phonepeTxnId = 'N/A';
 
     try {
-      const verifyRes = await fetch(`${PHONEPE_BASE_URL}${endpoint}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "X-VERIFY": checksum,
-          "X-MERCHANT-ID": PHONEPE_MERCHANT_ID
-        }
-      });
+      const { status, data } = await getPhonePeOrderStatus(merchantOrderId);
+      console.log("PhonePe V2 Status Response:", { status, data });
 
-      const verifyData = await verifyRes.json();
-      if (verifyData.success && verifyData.code === "PAYMENT_SUCCESS") {
+      const state = data?.state || data?.code;
+      if (state === "COMPLETED" || state === "SUCCESS" || state === "PAYMENT_SUCCESS") {
         isSuccess = true;
-        if (verifyData.data?.amount) {
-          verifiedAmount = verifyData.data.amount / 100;
+        if (data?.amount) {
+          verifiedAmount = data.amount / 100;
         }
-        if (verifyData.data?.transactionId) {
-          phonepeTxnId = verifyData.data.transactionId;
+        if (data?.orderId) {
+          phonepeTxnId = data.orderId;
         }
+      } else if (state === "PENDING" || state === "PAYMENT_PENDING") {
+        isPending = true;
       }
     } catch (e) {
-      console.error("PhonePe status verification call failed:", e);
-      // Fallback check on formData code if status endpoint failed
-      if (code === "PAYMENT_SUCCESS") {
-        isSuccess = true;
-      }
+      console.error("PhonePe V2 status verification call failed:", e);
     }
 
-    if (isSuccess || code === "PAYMENT_SUCCESS") {
+    if (isSuccess) {
       // 1. Determine package class quota
       let packageClasses = 12; // default
       if (order.membershipId) {
@@ -126,16 +134,18 @@ export async function POST(req: NextRequest) {
 
       // Create Payment record
       await Payment.create({
-        orderId: orderId,
+        orderId: order.id,
         studentId: order.studentId,
         amount: verifiedAmount,
         currency: "INR",
         status: "SUCCESS",
-        merchantTransactionId: merchantTransactionId,
+        merchantTransactionId: merchantOrderId,
         phonepeTransactionId: phonepeTxnId,
       } as any);
 
-      return NextResponse.redirect(`${appUrl}/invoice/${orderId}`, 303);
+      return NextResponse.redirect(`${appUrl}/invoice/${order.id}`, 303);
+    } else if (isPending) {
+      return NextResponse.redirect(`${appUrl}/student?payment=pending`, 303);
     } else {
       // Payment Failed
       await order.update({ status: "FAILED" });
@@ -148,3 +158,10 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function GET(req: NextRequest) {
+  return processCallback(req);
+}
+
+export async function POST(req: NextRequest) {
+  return processCallback(req);
+}

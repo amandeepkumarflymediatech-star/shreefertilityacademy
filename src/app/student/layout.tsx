@@ -4,7 +4,8 @@ import { useState } from 'react';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Calendar, CreditCard, Settings, LogOut, Bell, Search, Award, Menu, X, Users, Video, User as UserIcon, BookOpen, Receipt } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { handleAppLogout } from "@/lib/logout";
 import Image from "next/image";
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
@@ -88,8 +89,8 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
 
         <div className="p-6 border-t border-secondary/30">
           <button 
-            onClick={() => signOut({ callbackUrl: '/' })}
-            className="flex w-full items-center gap-4 px-4 py-3.5 text-primary/60 hover:bg-red-50 hover:text-red-600 transition-all duration-300 rounded-2xl group"
+            onClick={() => handleAppLogout('/login')}
+            className="flex w-full items-center gap-4 px-4 py-3.5 text-primary/60 hover:bg-red-50 hover:text-red-600 transition-all duration-300 rounded-2xl group cursor-pointer"
           >
             <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" /> 
             <span className="font-bold text-sm tracking-wide">Logout</span>

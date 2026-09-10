@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { User, LogOut, LayoutDashboard, ChevronDown, Menu, X } from "lucide-react";
+import { handleAppLogout } from "@/lib/logout";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -110,8 +111,8 @@ export default function Navbar() {
                       Dashboard
                     </Link>
                     <button
-                      onClick={() => { setIsDropdownOpen(false); signOut({ callbackUrl: '/' }); }}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-accent/10 text-accent transition font-bold text-sm w-full text-left"
+                      onClick={() => { setIsDropdownOpen(false); handleAppLogout('/'); }}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-accent/10 text-accent transition font-bold text-sm w-full text-left cursor-pointer"
                     >
                       <LogOut size={16} />
                       Sign Out
@@ -180,8 +181,8 @@ export default function Navbar() {
                   Dashboard
                 </Link>
                 <button
-                  onClick={() => { setIsMobileMenuOpen(false); signOut({ callbackUrl: '/' }); }}
-                  className="flex items-center gap-3 py-3 text-sm font-bold uppercase tracking-widest text-accent w-full text-left"
+                  onClick={() => { setIsMobileMenuOpen(false); handleAppLogout('/'); }}
+                  className="flex items-center gap-3 py-3 text-sm font-bold uppercase tracking-widest text-accent w-full text-left cursor-pointer"
                 >
                   <LogOut size={18} />
                   Sign Out

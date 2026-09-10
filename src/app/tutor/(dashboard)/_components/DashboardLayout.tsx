@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Calendar, Video, Settings, LogOut, Bell, Menu, X, CircleDollarSign, Users, User } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { handleAppLogout } from "@/lib/logout";
 import Image from "next/image";
 
 export default function DashboardLayout({ children, user }: { children: React.ReactNode, user: any }) {
@@ -74,8 +74,8 @@ export default function DashboardLayout({ children, user }: { children: React.Re
 
         <div className="p-6 border-t border-secondary/20">
           <button 
-            onClick={() => signOut({ callbackUrl: '/' })}
-            className="flex w-full items-center gap-4 px-4 py-3.5 rounded-2xl text-primary/70 hover:bg-red-50 hover:text-red-600 transition-all duration-300 group"
+            onClick={() => handleAppLogout('/portal/login')}
+            className="flex w-full items-center gap-4 px-4 py-3.5 rounded-2xl text-primary/70 hover:bg-red-50 hover:text-red-600 transition-all duration-300 group cursor-pointer"
           >
             <LogOut size={20} className="group-hover:-translate-x-1 transition-transform text-red-400 group-hover:text-red-600" /> 
             <span className="font-bold text-sm uppercase tracking-widest">Logout</span>

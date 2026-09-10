@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { LayoutDashboard, Users, CreditCard, Settings, LogOut, Bell, Search, GraduationCap, MessageSquare, FileText, SearchCode, BookOpen, Banknote, Tag, Menu, X } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { handleAppLogout } from "@/lib/logout";
 import Image from "next/image";
 import logoImg from "@/../public/logo.png";
 import { Toaster } from "sonner";
@@ -84,8 +84,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         <div className="mt-auto p-4 border-t border-accent/20">
           <button
-            onClick={() => signOut({ callbackUrl: '/' })}
-            className="flex w-full items-center gap-3 px-4 py-3 rounded-sm text-white/70 hover:bg-white/10 hover:text-white transition-all duration-200 group"
+            onClick={() => handleAppLogout('/portal/login')}
+            className="flex w-full items-center gap-3 px-4 py-3 rounded-sm text-white/70 hover:bg-white/10 hover:text-white transition-all duration-200 group cursor-pointer"
           >
             <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
             <span className="font-bold text-sm uppercase tracking-wide">Logout</span>
@@ -104,8 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Menu size={24} />
           </button>
           
-          <div className="flex items-center gap-5">
-
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white font-bold font-playfair text-xl shadow-md">
                 A
@@ -115,6 +114,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div className="text-xs text-primary/60 uppercase tracking-widest mt-0.5">Superadmin</div>
               </div>
             </div>
+
+            <button
+              onClick={() => handleAppLogout('/portal/login')}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white transition-all cursor-pointer shadow-sm"
+              title="Logout & Clear All Cache"
+            >
+              <LogOut size={15} />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
           </div>
         </header>
 
