@@ -30,7 +30,8 @@ export default function Footer() {
               <li><Link href="/" className="hover:text-accent transition-colors">Home</Link></li>
               <li><Link href="/about" className="hover:text-accent transition-colors">About Dr. Vaishali</Link></li>
               <li><Link href="/courses" className="hover:text-accent transition-colors">The Program</Link></li>
-              <li><Link href="/pricing" className="hover:text-accent transition-colors">Contact & Enrol</Link></li>
+              <li><Link href="/pricing" className="hover:text-accent transition-colors">Enroll Now</Link></li>
+              <li><Link href="/contact" className="hover:text-accent transition-colors">Contact Us</Link></li>
             </ul>
           </div>
 

@@ -40,7 +40,8 @@ export default function Navbar() {
     { label: 'Home', href: '/' },
     { label: 'About Dr. Vaishali', href: '/about' },
     { label: 'The Program', href: '/courses' },
-    { label: 'Contact & Enrol', href: '/pricing' },
+    { label: 'Enroll Now', href: '/pricing' },
+    { label: 'Contact', href: '/contact' },
   ];
 
   return (

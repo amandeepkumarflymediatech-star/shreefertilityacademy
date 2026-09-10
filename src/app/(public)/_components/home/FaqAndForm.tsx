@@ -25,7 +25,8 @@ export default function FaqAndForm() {
     firstName: '',
     lastName: '',
     email: '',
-    phone: ''
+    phone: '',
+    message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -62,19 +63,21 @@ export default function FaqAndForm() {
     setIsSubmitting(true);
 
     const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-    const message = `Phone: ${formData.phone || 'Not provided'} | Inquiry from Homepage Request Info form.`;
+    const finalMessage = formData.message 
+      ? `Phone: ${formData.phone || 'N/A'}\nMessage: ${formData.message}`
+      : `Phone: ${formData.phone || 'N/A'} (Requested info on fellowship program)`;
 
     try {
       const res = await submitContactMessage({
         name: fullName || 'Prospective Fellow',
         email: formData.email,
         studyPreference: 'Homepage Inquiry / Request Info',
-        message: message,
+        message: finalMessage,
       });
 
       if (res.success) {
         setIsSubmitted(true);
-        setFormData({ firstName: '', lastName: '', email: '', phone: '' });
+        setFormData({ firstName: '', lastName: '', email: '', phone: '', message: '' });
         toast.success("Thank you! Your information request has been submitted.");
       } else {
         toast.error(res.error || "Failed to submit form. Please try again.");
@@ -87,7 +90,7 @@ export default function FaqAndForm() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -187,11 +190,23 @@ export default function FaqAndForm() {
                          />
                        </div>
                     </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-white/70 uppercase tracking-widest mb-1.5">Message / Questions (Optional)</label>
+                      <textarea
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                        rows={3}
+                        className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-accent transition-colors resize-none"
+                        placeholder="Tell us about your background or queries regarding the fellowship..."
+                      />
+                    </div>
                     
                     <button 
                       type="submit" 
                       disabled={isSubmitting}
-                      className="w-full bg-white text-primary hover:bg-accent hover:text-white font-bold uppercase tracking-widest text-sm py-4 rounded-xl mt-6 transition-colors shadow-lg flex items-center justify-center gap-2 disabled:opacity-60"
+                      className="w-full bg-white text-primary hover:bg-accent hover:text-white font-bold uppercase tracking-widest text-sm py-4 rounded-xl mt-4 transition-colors shadow-lg flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
                     >
                       {isSubmitting ? (
                         <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />

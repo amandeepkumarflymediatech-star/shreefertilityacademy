@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { MessageSquare, Search, CheckCircle, Clock, Trash2, ArrowUpDown, ChevronLeft, ChevronRight, Mail } from "lucide-react";
+import { MessageSquare, Search, CheckCircle, Clock, Trash2, ArrowUpDown, ChevronLeft, ChevronRight, Mail, Eye, X } from "lucide-react";
 import { updateContactStatus, deleteContact } from "@/actions/contact-actions";
 import { toast } from "sonner";
 import Swal from "sweetalert2";
@@ -21,6 +21,7 @@ export default function ContactManagementClient({ contacts }: { contacts: Contac
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [sortConfig, setSortConfig] = useState<{ key: keyof Contact; direction: 'asc' | 'desc' } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const itemsPerPage = 10;
 
   const processedContacts = useMemo(() => {
@@ -65,6 +66,10 @@ export default function ContactManagementClient({ contacts }: { contacts: Contac
 
   const handleStatus = async (id: string, status: string) => {
     await updateContactStatus(id, status);
+    if (selectedContact && selectedContact.id === id) {
+      setSelectedContact(prev => prev ? { ...prev, status } : null);
+    }
+    toast.success(`Message marked as ${status.toLowerCase()}`);
   };
 
   const handleDelete = async (id: string) => {
@@ -80,6 +85,9 @@ export default function ContactManagementClient({ contacts }: { contacts: Contac
 
     if (result.isConfirmed) {
       await deleteContact(id);
+      if (selectedContact && selectedContact.id === id) {
+        setSelectedContact(null);
+      }
       toast.success("Message deleted");
     }
   };
@@ -88,8 +96,8 @@ export default function ContactManagementClient({ contacts }: { contacts: Contac
     <>
       <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-secondary/20 mb-6">
         <div>
-          <h1 className="text-2xl font-black text-primary font-playfair tracking-tight">Contact Messages</h1>
-          <p className="text-primary/60 text-sm mt-1">View and manage inquiries from the public contact form.</p>
+          <h1 className="text-2xl font-black text-primary font-playfair tracking-tight">Contact Inquiries & Messages</h1>
+          <p className="text-primary/60 text-sm mt-1">View and manage inquiries from website forms.</p>
         </div>
       </div>
 
@@ -127,7 +135,7 @@ export default function ContactManagementClient({ contacts }: { contacts: Contac
                 <th className="p-6 text-xs font-bold text-primary/60 uppercase tracking-widest cursor-pointer hover:bg-secondary/20 transition-colors" onClick={() => handleSort('name')}>
                   <div className="flex items-center gap-2">Sender {sortConfig?.key === 'name' && <ArrowUpDown size={14} className={sortConfig.direction === 'desc' ? 'rotate-180' : ''} />}</div>
                 </th>
-                <th className="p-6 text-xs font-bold text-primary/60 uppercase tracking-widest">Message</th>
+                <th className="p-6 text-xs font-bold text-primary/60 uppercase tracking-widest">Inquiry Details & Message</th>
                 <th className="p-6 text-xs font-bold text-primary/60 uppercase tracking-widest cursor-pointer hover:bg-secondary/20 transition-colors" onClick={() => handleSort('status')}>
                   <div className="flex items-center gap-2">Status {sortConfig?.key === 'status' && <ArrowUpDown size={14} className={sortConfig.direction === 'desc' ? 'rotate-180' : ''} />}</div>
                 </th>
@@ -156,7 +164,9 @@ export default function ContactManagementClient({ contacts }: { contacts: Contac
                   </td>
                   <td className="p-6 w-2/5">
                     <p className="text-xs font-bold text-primary/50 uppercase tracking-widest mb-1">{contact.studyPreference}</p>
-                    <p className="text-sm text-primary/80 line-clamp-2" title={contact.message}>{contact.message}</p>
+                    <p className="text-sm text-primary/80 line-clamp-2 cursor-pointer hover:text-primary" onClick={() => setSelectedContact(contact)} title="Click to view full message">
+                      {contact.message}
+                    </p>
                   </td>
                   <td className="p-6">
                     {contact.status === 'UNREAD' ? (
@@ -177,6 +187,13 @@ export default function ContactManagementClient({ contacts }: { contacts: Contac
                     {new Date(contact.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </td>
                   <td className="p-6 text-right relative flex gap-1 justify-end">
+                    <button 
+                      onClick={() => setSelectedContact(contact)}
+                      className="p-2 text-primary/60 hover:text-accent hover:bg-accent/10 rounded-lg transition-colors"
+                      title="View Full Message"
+                    >
+                      <Eye size={18} />
+                    </button>
                     {contact.status !== 'READ' && (
                       <button 
                         onClick={() => handleStatus(contact.id, 'READ')}
@@ -221,6 +238,81 @@ export default function ContactManagementClient({ contacts }: { contacts: Contac
           </div>
         )}
       </div>
+
+      {/* Message Detail Modal */}
+      {selectedContact && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl border border-secondary/20 relative animate-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setSelectedContact(null)}
+              className="absolute top-6 right-6 p-2 rounded-xl text-primary/40 hover:text-primary hover:bg-secondary/10 transition-colors"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-accent/10 text-accent flex items-center justify-center">
+                <Mail size={24} />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-primary font-playfair">{selectedContact.name}</h3>
+                <p className="text-xs text-primary/50 font-bold uppercase tracking-wider">{selectedContact.studyPreference}</p>
+              </div>
+            </div>
+
+            <div className="space-y-4 mb-8">
+              <div className="bg-secondary/5 rounded-2xl p-4 border border-secondary/10">
+                <span className="text-xs font-bold text-primary/50 uppercase tracking-widest block mb-1">Email Address</span>
+                <a href={`mailto:${selectedContact.email}`} className="text-sm font-bold text-accent hover:underline">
+                  {selectedContact.email}
+                </a>
+              </div>
+
+              <div className="bg-secondary/5 rounded-2xl p-4 border border-secondary/10">
+                <span className="text-xs font-bold text-primary/50 uppercase tracking-widest block mb-1">Received On</span>
+                <p className="text-sm font-medium text-primary">
+                  {new Date(selectedContact.createdAt).toLocaleString()}
+                </p>
+              </div>
+
+              <div className="bg-secondary/5 rounded-2xl p-5 border border-secondary/10">
+                <span className="text-xs font-bold text-primary/50 uppercase tracking-widest block mb-2">Message Content</span>
+                <p className="text-sm text-primary/90 whitespace-pre-line leading-relaxed font-sans">
+                  {selectedContact.message}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 pt-4 border-t border-secondary/10">
+              <div className="flex gap-2">
+                {selectedContact.status !== 'READ' && (
+                  <button
+                    onClick={() => handleStatus(selectedContact.id, 'READ')}
+                    className="px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-bold uppercase tracking-widest transition"
+                  >
+                    Mark Read
+                  </button>
+                )}
+                {selectedContact.status !== 'RESOLVED' && (
+                  <button
+                    onClick={() => handleStatus(selectedContact.id, 'RESOLVED')}
+                    className="px-4 py-2 bg-green-50 text-green-700 hover:bg-green-100 rounded-xl text-xs font-bold uppercase tracking-widest transition"
+                  >
+                    Mark Resolved
+                  </button>
+                )}
+              </div>
+
+              <a
+                href={`mailto:${selectedContact.email}?subject=Re: ${encodeURIComponent(selectedContact.studyPreference)}`}
+                className="px-6 py-2.5 bg-accent text-white hover:bg-accent/90 rounded-xl text-xs font-bold uppercase tracking-widest transition shadow-sm flex items-center gap-2"
+              >
+                <Mail size={14} /> Reply by Email
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
