@@ -1601,6 +1601,9 @@ Coupon.hasMany(Order, { as: 'orders', foreignKey: 'couponId' });
 Membership.belongsTo(User, { as: 'student', foreignKey: 'studentId' });
 User.hasMany(Membership, { as: 'memberships', foreignKey: 'studentId' });
 
+Payment.belongsTo(User, { as: 'student', foreignKey: 'studentId' });
+User.hasMany(Payment, { as: 'payments', foreignKey: 'studentId' });
+
 
 BlogPost.belongsTo(User, { as: 'author', foreignKey: 'authorId' });
 User.hasMany(BlogPost, { as: 'blogPosts', foreignKey: 'authorId' });

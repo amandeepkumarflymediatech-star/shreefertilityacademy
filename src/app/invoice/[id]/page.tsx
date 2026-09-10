@@ -14,15 +14,17 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   
   const session = await getServerSession(authOptions);
   
-  if (!session || session.user.role !== "STUDENT") {
+  if (!session || (session.user.role !== "STUDENT" && session.user.role !== "ADMIN")) {
     redirect("/login");
   }
 
+  const whereClause: any = { id: id };
+  if (session.user.role !== "ADMIN") {
+    whereClause.studentId = session.user.id;
+  }
+
   const order = await Order.findOne({
-    where: { 
-      id: id,
-      studentId: session.user.id // Ensure they can only see their own orders
-    },
+    where: whereClause,
     include: [
       { model: User, as: 'student' },
       { model: Payment, as: 'payment' },
@@ -37,7 +39,12 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
       <div className="p-8 max-w-3xl mx-auto text-center mt-20">
         <h1 className="text-2xl font-black text-primary font-playfair mb-4">Invoice Not Found</h1>
         <p className="text-primary/70 font-sans mb-8">We couldn't find the requested invoice or you don't have access to it.</p>
-        <Link href="/student" className="text-accent font-bold hover:underline">Return to Dashboard</Link>
+        <Link 
+          href={session.user.role === "ADMIN" ? "/admin/payments" : "/student"} 
+          className="text-accent font-bold hover:underline"
+        >
+          {session.user.role === "ADMIN" ? "Return to Payments" : "Return to Dashboard"}
+        </Link>
       </div>
     );
   }
@@ -66,8 +73,11 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         
         {/* Controls - Hidden when printing */}
         <div className="flex justify-between items-center mb-8 print:hidden">
-          <Link href="/student" className="flex items-center gap-2 text-primary/70 hover:text-accent transition-colors font-bold uppercase tracking-widest text-xs">
-            <ArrowLeft size={16} /> Back to Dashboard
+          <Link 
+            href={session.user.role === "ADMIN" ? "/admin/payments" : "/student"} 
+            className="flex items-center gap-2 text-primary/70 hover:text-accent transition-colors font-bold uppercase tracking-widest text-xs"
+          >
+            <ArrowLeft size={16} /> {session.user.role === "ADMIN" ? "Back to Payments" : "Back to Dashboard"}
           </Link>
           <PrintInvoiceButton />
         </div>

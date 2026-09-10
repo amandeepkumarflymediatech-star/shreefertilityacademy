@@ -235,3 +235,100 @@ export async function deleteTutor(id: string) {
   revalidatePath("/mentors");
 }
 
+export async function createMembership(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "ADMIN") throw new Error("Unauthorized");
+
+  const { Membership, User } = await import("@/models");
+
+  const studentId = formData.get("studentId") as string;
+  const maxClasses = parseInt((formData.get("maxClasses") as string) || "12", 10);
+  const usedClasses = parseInt((formData.get("usedClasses") as string) || "0", 10);
+  const validUntilStr = formData.get("validUntil") as string;
+  const status = (formData.get("status") as string) || "ACTIVE";
+
+  if (!studentId) {
+    throw new Error("Student is required");
+  }
+
+  const student = await User.findByPk(studentId);
+  if (!student) {
+    throw new Error("Student not found");
+  }
+
+  const validUntil = validUntilStr ? new Date(validUntilStr) : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
+  await Membership.create({
+    studentId,
+    maxClasses,
+    usedClasses,
+    validUntil,
+    status,
+  } as any);
+
+  revalidatePath("/admin/enrollments");
+  revalidatePath("/admin");
+}
+
+export async function updateMembership(id: string, formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "ADMIN") throw new Error("Unauthorized");
+
+  const { Membership } = await import("@/models");
+
+  const maxClasses = parseInt((formData.get("maxClasses") as string) || "12", 10);
+  const usedClasses = parseInt((formData.get("usedClasses") as string) || "0", 10);
+  const validUntilStr = formData.get("validUntil") as string;
+  const status = formData.get("status") as string;
+
+  const membership = await Membership.findByPk(id);
+  if (!membership) throw new Error("Membership not found");
+
+  const updateData: any = {
+    maxClasses,
+    usedClasses,
+    status: status || membership.status
+  };
+
+  if (validUntilStr) {
+    updateData.validUntil = new Date(validUntilStr);
+  }
+
+  await membership.update(updateData);
+
+  revalidatePath("/admin/enrollments");
+  revalidatePath("/admin");
+}
+
+export async function deleteMembership(id: string) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "ADMIN") throw new Error("Unauthorized");
+
+  const { Membership } = await import("@/models");
+  await Membership.destroy({ where: { id } });
+
+  revalidatePath("/admin/enrollments");
+  revalidatePath("/admin");
+}
+
+export async function updateOrderStatus(orderId: string, status: string) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "ADMIN") throw new Error("Unauthorized");
+
+  const { Order, Payment } = await import("@/models");
+
+  const order = await Order.findByPk(orderId);
+  if (!order) throw new Error("Order not found");
+
+  await order.update({ status });
+
+  const payment = await Payment.findOne({ where: { orderId } });
+  if (payment) {
+    const paymentStatus = status === "PAID" ? "SUCCESS" : status === "FAILED" ? "FAILED" : status;
+    await payment.update({ status: paymentStatus });
+  }
+
+  revalidatePath("/admin/payments");
+  revalidatePath("/admin");
+}
+
